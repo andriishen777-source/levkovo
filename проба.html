@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>levkovo | Handmade</title>
+    <link rel="icon" type="image/png" href="favicon.jpg">
+    <link rel="stylesheet" href="css.css">
+</head>
+<body>
+
+<div class="navbar">
+    <div class="menu-icon" id="menuBtn" onclick="toggleSidebar()">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+    <div class="nav-logo">LEVKOVO</div>
+    <div class="cart-icon" onclick="openCart()">
+        🛒 <span class="cart-count" id="cart-count">0</span>
+    </div>
+</div>
+
+<div id="sidebar" class="sidebar">
+    <div style="text-align: right; cursor: pointer; font-size: 1.5rem;" onclick="toggleSidebar()">✕</div>
+    <ul>
+        <li><a href="#">Головна</a></li>
+        <li>
+            <strong>Товари</strong>
+            <ul class="submenu">
+                <li><a href="#">• Гаманці</a></li>
+                <li><a href="#">• Екзотична шкіра</a></li>
+                <li><a href="#">• Брелоки</a></li>
+            </ul>
+        </li>
+        <li><a href="#" onclick="login()">Мій Профіль / Вхід</a></li>
+        <li><a href="#">Про нас</a></li>
+        <li id="admin-link" style="display: none;"><a href="#" style="color: #ffd700;">Панель Адміна</a></li>
+    </ul>
+</div>
+
+<header>
+    <h1>levkovo</h1>
+    <p>Вироби з Crazy Horse у Вінниці</p>
+</header>
+
+<div id="cartModal" class="modal-overlay">
+    <div class="modal-content cart-wide">
+        <div class="modal-close-x" onclick="closeCart()">✕</div>
+        <h2>Твій кошик</h2>
+        <div id="cart-items-container">
+            </div>
+        <div class="cart-footer">
+            <div id="cart-total">Разом: 0 грн</div>
+            <button class="modal-btn btn-confirm" onclick="openCheckout()">
+    Оформити замовлення
+</button>
+            <button class="modal-btn btn-continue" onclick="closeCart()">Продовжити покупки</button>
+        </div>
+    </div>
+</div>
+
+<div class="catalog">
+    <div class="card">
+        <img src="wallet1.jpg" class="product-image" alt="Брелок">
+        <div class="product-info">
+            <h3>Персоналізований брелок</h3>
+            <p>Шкіра Crazy Horse, Вінниця.</p>
+            <div class="price">300 грн</div>
+            <button class="btn-buy" onclick="addToCart('Брелок Crazy Horse', 300, 'wallet1.jpg')">Купити</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <img src="wallet2.jpg" class="product-image" alt="Сумка">
+        <div class="product-info">
+            <h3>Брелок з вашим логотипом</h3>
+            <p>чудовий брелок для корпоративного замовлення</p>
+            <div class="price">200 грн</div>
+            <button class="btn-buy" onclick="addToCart('Брелок з логотипом', 200, 'wallet2.jpg')">Купити</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<div id="checkoutModal" class="modal-overlay">
+    <div class="modal-content checkout-container">
+        <span class="modal-close-x" onclick="closeCheckout()">✕</span>
+        <h2>Оформлення замовлення</h2>
+        
+        <form id="orderForm" onsubmit="generateReceipt(event)">
+            <div class="form-grid">
+                <input type="text" placeholder="Ім'я" required>
+                <input type="text" placeholder="Прізвище" required>
+                <input type="tel" placeholder="Номер телефону" required>
+                <input type="email" placeholder="Email" required>
+            </div>
+
+            <div class="shipping-section">
+    <h3>Доставка</h3>
+    <select id="shippingMethod" onchange="handleShippingChange()" required>
+        <option value="" disabled selected>Оберіть службу доставки</option>
+        <option value="nova">Нова Пошта</option>
+        <option value="ukr">Укрпошта</option>
+    </select>
+
+    <div id="npOptions" style="display: none; margin-top: 10px;">
+        <select id="npType" onchange="handleNPTypeChange()">
+            <option value="" disabled selected>Оберіть тип доставки НП</option>
+            <option value="department">У відділення</option>
+            <option value="courier">Кур'єром</option>
+        </select>
+    </div>
+
+    <div id="shippingDetails" style="display: none; margin-top: 10px;">
+        </div>
+</div>
+
+           <div class="payment-section">
+    <h3>Спосіб оплати</h3>
+    <select id="paymentMethod" required>
+        <option value="manager">Оплата на карту(менеджер звʼяжеться з вами)</option>
+        <option value="card">Оплата за реквізитами (менеджер звʼяжеться з вами)</option>
+        <option value="cash">Післяплата</option>
+    </select>
+</div>
+<div class="feedback-options" style="margin: 15px 0; text-align: left;">
+    <h3>Зворотний зв'язок:</h3>
+    <label style="display: block; margin-bottom: 8px; cursor: pointer;">
+        <input type="radio" name="callback" value="Зателефонуйте мені" checked style="width: auto;"> 
+        Зателефонуйте мені для підтвердження
+    </label>
+    <label style="display: block; cursor: pointer;">
+        <input type="radio" name="callback" value="Не телефонуйте (пишіть у месенджер)" style="width: auto;"> 
+        Не телефонуйте мені (чекаю повідомлення)
+    </label>
+</div>
+
+            <textarea placeholder="Коментар до замовлення (наприклад, гравіювання)" rows="3"></textarea>
+
+            <div class="order-summary">
+                <h3>Твій кошик у замовленні:</h3>
+                <div id="checkout-items"></div>
+                <div id="checkout-total" style="font-weight: bold; margin-top: 10px;"></div>
+            </div>
+
+            <button type="submit" class="modal-btn btn-confirm">Підтвердити замовлення</button>
+        </form>
+    </div>
+</div>
+
+<div id="receiptOverlay" class="modal-overlay">
+    <div class="modal-content receipt-box" id="receiptPrint">
+        </div>
+</div>
+</body>
+</html>

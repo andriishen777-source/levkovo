@@ -1,0 +1,328 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding-top: 80px;
+    background-color: #f9f7f2;
+    
+}
+
+header { text-align: center; padding: 20px; }
+
+/* Навігація */
+.navbar {
+    position: fixed;
+    top: 0; width: 100%; height: 60px;
+    background: #1a1a1a; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; z-index: 1000; box-sizing: border-box;
+}
+
+.nav-logo { position: absolute; left: 50%; transform: translateX(-50%); font-weight: bold; letter-spacing: 2px; }
+
+.cart-count { background: #8b4513; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
+
+/* Нове бокове меню з ефектом росту */
+.sidebar {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 280px;
+    background: white;
+    z-index: 1001;
+    padding: 25px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    border-radius: 20px;
+    
+    /* Початковий стан (сховано) */
+    display: none; 
+    opacity: 0;
+    transform: scale(0.1);
+    transform-origin: top left; /* Росте з кнопки меню */
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Стан, коли меню відкрите */
+.sidebar.active {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Пункти меню з'являються по черзі */
+.sidebar li {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    opacity: 0;
+    transform: translateX(-15px);
+    transition: 0.4s;
+}
+
+.sidebar.active li {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Каталог */
+.catalog { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+.card { width: 320px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.product-image { width: 100%; height: 300px; object-fit: cover; }
+.product-info { padding: 15px; text-align: center; }
+.price { font-weight: bold; font-size: 1.2rem; margin: 10px 0; }
+
+/* Плавна кнопка */
+.btn-buy {
+    width: 100%; padding: 12px; background: #8b4513;
+    color: white; border: none; border-radius: 8px;
+    font-weight: bold; cursor: pointer;
+    transition: 0.3s;
+}
+.btn-buy:hover {
+    background: #6d360f;
+    animation: smoothJump 1.2s infinite ease-in-out;
+}
+
+@keyframes smoothJump {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px) scale(1.02); }
+}
+
+/* Модалки та Кошик */
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+    z-index: 2000; justify-content: center; align-items: center;
+}
+.modal-content { 
+    background: white; padding: 30px; border-radius: 20px; 
+    text-align: center; position: relative;
+}
+.cart-wide { width: 90%; max-width: 450px; text-align: left; }
+
+.modal-close-x {
+    position: absolute; top: 15px; right: 15px;
+    font-size: 1.5rem; cursor: pointer; color: #999;
+}
+
+.cart-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid #eee;
+}
+.cart-checkbox { width: 18px; height: 18px; accent-color: #8b4513; }
+.cart-img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
+.qty-btn { border: none; background: #eee; padding: 2px 8px; cursor: pointer; border-radius: 4px; }
+
+/* Хрестик-втікач */
+.runaway-delete { cursor: pointer; color: #ccc; font-weight: bold; transition: 0.2s; }
+.runaway-delete.active { 
+    position: fixed; z-index: 3000; color: red; 
+    background: white; padding: 10px; border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.modal-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+.btn-confirm { background: #1a1a1a; color: white; }
+.btn-continue { background: #eee; }
+/* Кругла іконка кошика */
+.cart-icon {
+    cursor: pointer;
+    position: relative;
+    background: #2c2c2c; /* Темний фон, щоб не різав очі */
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px; /* Легке закруглення */
+    transition: transform 0.2s ease;
+}
+
+.cart-icon:hover {
+    transform: scale(1.05);
+}
+
+/* Ефект джина (збільшення з кутка) */
+@keyframes genieEffect {
+    0% {
+        opacity: 0;
+        transform: scale(0.1) translate(100%, -100%);
+        border-radius: 100px;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translate(0, 0);
+        border-radius: 20px;
+    }
+}
+
+.modal-content.cart-wide {
+    animation: genieEffect 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    transform-origin: top right; /* Точка росту — верхній правий кут */
+}
+
+/* Стиль цифри на кошику */
+.cart-count {
+    background: #8b4513;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 50%;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    border: 2px solid #1a1a1a;
+}
+/* Елегантна анімація кнопки "три палки" */
+.menu-icon {
+    width: 30px;
+    height: 20px;
+    position: relative;
+    cursor: pointer;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.menu-icon span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    border-radius: 3px;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Перетворення в хрестик */
+.menu-icon.open span:nth-child(1) {
+    transform: translateY(8.5px) rotate(45deg);
+}
+.menu-icon.open span:nth-child(2) {
+    opacity: 0;
+}
+.menu-icon.open span:nth-child(3) {
+    transform: translateY(-8.5px) rotate(-45deg);
+}
+
+/* Елегантний дизайн меню */
+.sidebar {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 260px;
+    background: rgba(255, 255, 255, 0.95); /* Напівпрозорий білий */
+    backdrop-filter: blur(10px); /* Ефект розмиття фону */
+    z-index: 1050;
+    padding: 40px 25px;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    
+    display: none;
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+    transform-origin: top left;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sidebar.active {
+    display: block;
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+/* Стиль посилань у меню */
+.sidebar ul { list-style: none; padding: 0; margin: 0; }
+
+.sidebar li {
+    margin: 15px 0;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: 0.4s ease;
+}
+
+.sidebar.active li { opacity: 1; transform: translateX(0); }
+
+.sidebar a {
+    text-decoration: none;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.sidebar a:hover { color: #8b4513; }
+/* Базовий вигляд хрестика в рядку товару */
+.runaway-delete {
+    cursor: pointer;
+    color: #999;
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 5px;
+    transition: 0.2s;
+}
+
+/* Стан, коли хрестик "втік" */
+.runaway-delete.active {
+    position: fixed; /* Тепер він літає над усім контентом */
+    z-index: 9999;   /* Поверх усіх вікон */
+    background: #ff4d4d; /* Яскраво-червоний */
+    color: white;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 77, 77, 0.6);
+    border: 2px solid white;
+    animation: pulseRed 1s infinite;
+}
+
+@keyframes pulseRed {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+.checkout-container {
+    width: 95%;
+    max-width: 600px;
+    text-align: left;
+    max-height: 90vh;
+    overflow-y: auto; /* Щоб можна було скролити на телефоні */
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.checkout-container input, 
+.checkout-container select, 
+.checkout-container textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.order-summary {
+    background: #fdfaf5;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 20px 0;
+    border: 1px dashed #8b4513;
+}
+
+/* Стиль чека */
+.receipt-box {
+    font-family: 'Courier New', monospace; /* Стиль друкарської машинки */
+    background: white;
+    padding: 20px;
+    border: 1px solid #eee;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+#shippingDetails input {
+    margin-bottom: 5px; /* Невеликий відступ між полями адреси */
+}
