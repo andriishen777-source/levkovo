@@ -835,3 +835,65 @@ select {
         gap: 8px;
     }
 }
+/* ========================================= */
+/* БОЙОВИЙ ПАТЧ ДЛЯ МІБІЛЬНИХ ПРИСТРОЇВ (iOS) */
+/* ========================================= */
+
+/* 1. Вбиваємо горизонтальний скрол (щоб сайт не тікав) */
+html, body {
+    overflow-x: hidden !important;
+    width: 100%;
+    position: relative;
+}
+
+/* 2. Забороняємо iOS зумити екран при введенні тексту */
+input, textarea, select {
+    font-size: 16px !important;
+}
+
+/* 3. Вбиваємо потворні сині селектори Apple і робимо їх преміальними */
+select, .levkovo-input select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #fafafa;
+    color: #111 !important;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    font-size: 16px !important;
+    /* Додаємо свою красиву чорну стрілочку замість стандартної */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 1em;
+}
+
+/* 4. Лікуємо зависання модалок і фоновий скрол */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto !important; /* Дозволяємо скролити саму модалку */
+    -webkit-overflow-scrolling: touch; /* Плавний скрол на iOS */
+    padding: 20px 0;
+    box-sizing: border-box;
+}
+
+/* Модалка більше не буде обрізатися знизу */
+.modal-content {
+    margin: auto;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* 5. Вирівнюємо мобільне меню (навігацію), щоб воно не вилазило за екран */
+#mobileMenu, .mobile-menu {
+    max-width: 85vw !important; /* Меню займатиме максимум 85% екрану */
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
