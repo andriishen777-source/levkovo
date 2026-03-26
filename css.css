@@ -194,26 +194,33 @@ header { text-align: center; padding: 20px; }
 /* ========================================= */
 /* БІЛЕ АКУРАТНЕ ВІКОНЦЕ (iOS СУМІСНЕ) */
 /* ========================================= */
+/* ========================================= */
+/* БОКОВЕ МЕНЮ (БРОНЕБІЙНИЙ МОБІЛЬНИЙ СТАНДАРТ) */
+/* ========================================= */
 .sidebar {
     position: fixed;
-    top: 15px; /* Відступ зверху */
-    left: -100%; /* Заховано */
+    top: 0; 
+    left: -100%; 
     width: 85vw; 
     max-width: 350px;
-    height: calc(100vh - 30px); /* Висота екрану мінус відступи = бульбашка */
-    background-color: #ffffff; /* Білий преміальний фон */
-    color: #111; /* Чорний текст */
-    border-radius: 24px; /* Твої заокруглені краї */
+    height: 100%; /* Стандартна висота */
+    height: 100dvh; /* Сучасний фікс спеціально для iOS Safari */
+    background-color: #ffffff; 
+    color: #111; 
+    border-radius: 0 24px 24px 0; /* Закруглені тільки праві кути */
     transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 100000;
     
-    overflow-y: auto !important; /* Жорсткий скрол, щоб не вилазило */
+    /* Жорстке правило скролу */
+    overflow-y: auto !important; 
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch; 
     
     padding: 20px 25px;
+    /* Важливо: додаємо відступ знизу, щоб останні пункти точно не перекривалися */
+    padding-bottom: 60px; 
     box-sizing: border-box;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2); /* Тінь для ефекту левітації */
+    box-shadow: 10px 0 40px rgba(0,0,0,0.3); 
 }
 
 .sidebar.active {
