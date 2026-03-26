@@ -68,37 +68,40 @@
 </div>
 <div style="height: 66px;"></div>
 
+
 <div id="sidebar" class="sidebar">
-    <div style="text-align: right; cursor: pointer; font-size: 1.8rem; padding: 10px 20px; color: #fff;" onclick="toggleSidebar()">✕</div>
-    <h2 style="color: #111; text-align: center; margin-top: 0; margin-bottom: 25px; letter-spacing: 2px;">LEVKOVO</h2>
-    <ul style="padding-bottom: 40px;">
-        <li><a href="index.html">Головна</a></li>
+    <div style="text-align: right; cursor: pointer; font-size: 1.8rem; padding: 5px 15px; color: #111;" onclick="toggleSidebar()">✕</div>
+    
+    <h2 style="color: #111; text-align: center; margin-top: 0; margin-bottom: 10px; letter-spacing: 2px;">LEVKOVO</h2>
+    
+    <ul style="padding-bottom: 10px; margin: 0;">
+        <li><a href="index.html" style="padding: 8px 0;">Головна</a></li>
+        
         <li>
-            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 12px 0; border-bottom: 1px solid #eee;" onclick="toggleSubmenu()">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 8px 0; border-bottom: 1px solid #eee;" onclick="toggleSubmenu()">
                 <strong style="color: #333; font-size: 1.1rem; font-weight: 500;">Товари</strong>
                 <span id="submenu-arrow" style="color: #111; font-size: 1.2rem; transition: transform 0.3s;">▼</span>
             </div>
             <ul id="mobile-categories-list" class="submenu-accordion"></ul>
         </li>
-        <li><a href="#" onclick="openReviewsModal(); toggleSidebar(); return false;" style="color: #b8860b;">Відгуки клієнтів</a></li>
         
-        <li id="profile-link-li" style="margin-top: 10px; border-top: 2px solid #f5f5f5; padding-top: 10px; padding-bottom: 15px;">
+        <li><a href="#" onclick="openReviewsModal(); toggleSidebar(); return false;" style="color: #b8860b; padding: 8px 0;">Відгуки клієнтів</a></li>
+        
+        <li id="profile-link-li" style="margin-top: 5px; border-top: 2px solid #f5f5f5; padding-top: 10px; padding-bottom: 5px;">
             <a href="#" onclick="login(); toggleSidebar(); return false;" style="font-weight: bold; color: #111;">Мій Профіль / Реєстрація</a>
         </li>
 
-        <li style="margin-top: 20px;">
+        <li style="margin-top: 10px;">
             <ul style="list-style: none; padding: 0; border-left: 2px solid #eee; padding-left: 15px;">
-                <li><a href="#" onclick="openLegalModal('deliveryModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Оплата і доставка</a></li>
-                <li><a href="#" onclick="openLegalModal('returnModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Обмін та повернення</a></li>
-                <li><a href="#" onclick="openLegalModal('offerModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Публічна оферта</a></li>
+                <li><a href="#" onclick="openLegalModal('deliveryModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 4px 0; border: none;">Оплата і доставка</a></li>
+                <li><a href="#" onclick="openLegalModal('returnModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 4px 0; border: none;">Обмін та повернення</a></li>
+                <li><a href="#" onclick="openLegalModal('offerModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 4px 0; border: none;">Публічна оферта</a></li>
             </ul>
         </li>
 
-        <li style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
-            <a href="about.html" style="display: block; font-size: 0.95rem; color: #666; font-weight: 500; border: none; transition: 0.2s;"><h3> Про нас</h3></a>
-            <a href="#" onclick="openContacts(); toggleSidebar(); return false;" style="display: block; font-size: 1.3rem; font-weight: 800; color: #111; padding-bottom: 5px; border: none; transition: 0.2s;">
-            📞 Контакти
-        </a>
+        <li style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+            <a href="about.html" style="display: block; font-size: 0.95rem; color: #666; font-weight: 500; border: none; padding: 0; transition: 0.2s;"><h3>Про нас</h3></a>
+            <a href="#" onclick="openContacts(); toggleSidebar(); return false;" style="display: block; font-size: 1.3rem; font-weight: 800; color: #111; padding-bottom: 5px; border: none; transition: 0.2s;">📞 Контакти</a>
         </li>
     </ul> 
 </div>
