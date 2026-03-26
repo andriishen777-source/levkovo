@@ -16,7 +16,6 @@
 <body>
 
 <div class="navbar" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; width: 100%; box-sizing: border-box; background: #1a1a1a; color: #fff; position: fixed; top: 0; left: 0; z-index: 1000;">
-    
     <div style="flex: 1; text-align: left;">
         <div class="menu-icon" id="menuBtn" onclick="toggleSidebar()" style="cursor: pointer; display: inline-block;">
             <span></span><span></span><span></span>
@@ -24,7 +23,7 @@
     </div>
     
     <div style="flex: 1; text-align: center;">
-        <a href="about.html" style="font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; color: #fff; text-decoration: none; text-transform: uppercase;">LEVKOVO</a>
+        <a href="index.html" style="font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; color: #fff; text-decoration: none; text-transform: uppercase;">LEVKOVO</a>
     </div>
 
     <div style="flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
@@ -35,26 +34,49 @@
         </div>
     </div>
 </div>
-
 <div style="height: 66px;"></div>
 
 <div id="sidebar" class="sidebar">
-    <div style="text-align: right; cursor: pointer; font-size: 1.5rem; padding: 10px;" onclick="toggleSidebar()">✕</div>
-    <ul>
-        <li><a href="#">Головна</a></li>
-        <li>
-            <strong>Товари</strong>
-            <ul class="submenu">
-                <li><a href="category.html?type=wallets">• Гаманці з crazy horse</a></li>
-                <li><a href="category.html?type=exotic">• Гаманці з екзотичної шкіри</a></li>
-                <li><a href="category.html?type=keychains">• Брелки</a></li>
+    <div style="text-align: right; cursor: pointer; font-size: 1.8rem; padding: 10px 20px; color: #fff;" onclick="toggleSidebar()">✕</div>
+    
+    <h2 style="color: #111; text-align: center; margin-top: 0; margin-bottom: 25px; letter-spacing: 2px;">LEVKOVO</h2>
+    
+   <ul style="padding-bottom: 40px;">
+    <li><a href="index.html">Головна</a></li>
+    
+    <li>
+        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 12px 0; border-bottom: 1px solid #eee;" onclick="toggleSubmenu()">
+            <strong style="color: #333; font-size: 1.1rem; font-weight: 500;">Товари</strong>
+            <span id="submenu-arrow" style="color: #111; font-size: 1.2rem; transition: transform 0.3s;">▼</span>
+        </div>
+        <ul id="mobile-categories-list" class="submenu-accordion">
             </ul>
-        </li>
-        <li id="profile-link-li"><a href="#" onclick="login(); return false;">Мій Профіль / Реєстрація</a></li>
-        <li><a href="about.html">Про нас</a> </li>
-        <li><a href="#" onclick="openReviewsModal(); return false;" style="color: #ffd700;">Відгуки клієнтів</a></li>
-        <li><a href="#" onclick="openContacts(); return false;">Контакти</a></li>
-    </ul>
+    </li>
+    
+    <li><a href="#" onclick="openReviewsModal(); toggleSidebar(); return false;" style="color: #b8860b;">Відгуки клієнтів</a></li>
+    
+    <li id="profile-link-li" style="margin-top: 10px; border-top: 2px solid #f5f5f5; padding-top: 10px; padding-bottom: 15px;">
+        <a href="#" onclick="login(); toggleSidebar(); return false;" style="font-weight: bold; color: #111;">Мій Профіль / Реєстрація</a>
+    </li>
+
+    <li style="margin-top: 20px;">
+        <ul style="list-style: none; padding: 0; border-left: 2px solid #eee; padding-left: 15px;">
+            <li><a href="#" onclick="openLegalModal('deliveryModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Оплата і доставка</a></li>
+            <li><a href="#" onclick="openLegalModal('returnModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Обмін та повернення</a></li>
+            <li><a href="#" onclick="openLegalModal('offerModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Публічна оферта</a></li>
+        </ul>
+    </li>
+
+    <li style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
+         <a href="about.html" style="display: block; font-size: 0.95rem; color: #666; font-weight: 500; border: none; transition: 0.2s;">
+            <h3> Про нас</h3>
+        </a>
+        <a href="#" onclick="openContacts(); toggleSidebar(); return false;" style="display: block; font-size: 1.3rem; font-weight: 800; color: #111; padding-bottom: 5px; border: none; transition: 0.2s;">
+            📞 Контакти
+        </a>
+       
+    </li>
+</ul> 
 </div>
 
 <header style="margin-top: 20px;">
@@ -175,8 +197,10 @@
         </div>
         <div class="phone-display-box" style="text-align:center;">
             <p class="phone-label" style="color:#666; font-size:0.9rem;">Телефон майстра:</p>
-            <a href="tel:+380689721598" class="phone-number-premium" style="color:#000; font-size:1.2rem; font-weight:bold; text-decoration:none;">+38 (068) 972-15-98</a>
+            <a href="tel:+380689721598" class="phone-number-premium" style="color:#000; font-size:1.2rem; font-weight:bold; text-decoration:none;"><h2>+38 (068) 972-15-98</h2></a>
         </div>
+         <p style="color: #666; font-size: 0.95rem; margin-bottom: 5px;">📍 Україна, м. Вінниця</p>
+        <p style="color: #666; font-size: 0.95rem; margin: 0;">⏰ Пн-Пт: 9:00 - 23:00</p>
     </div>
 </div>
 
@@ -490,5 +514,6 @@
         document.getElementById(modalId).style.display = 'flex';
     }
 </script>
+
 </body>
 </html>

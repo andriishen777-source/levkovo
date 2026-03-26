@@ -1,9 +1,23 @@
+// ==========================================
 // Ініціалізація Supabase
+// ==========================================
 const SUPABASE_URL = 'https://gbcjezzvioayompuqojx.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_YSAGI0OwC12XkBCVmkBMsw_0TVpkgjW';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const DATABASE_URL = "https://script.google.com/macros/s/AKfycbwb60vHMeNOckDntRgobBn2Q7ULD3q8Xfer3Cj3dxKrbQTkzQl3u-eRwyWiUpBP3k398Q/exec";
+
+// ==========================================
+// ГЛОБАЛЬНА ПЕРЕВІРКА СТАТУСУ КОРИСТУВАЧА
+// ==========================================
+function isWholesaleUser() {
+    const userRaw = localStorage.getItem('currentUser');
+    if (!userRaw) return false;
+    try {
+        const user = JSON.parse(userRaw);
+        return user.isWholesale === 'yes';
+    } catch (e) { return false; }
+}
 
 // ==========================================
 // 1. АВТОРИЗАЦІЯ ТА ПРОФІЛЬ
@@ -27,8 +41,6 @@ async function submitAdminAuth() {
         window.location.reload(); 
     } catch (err) { alert("Помилка доступу: " + err.message); }
 }
-
-// --- НОВА ЛОГІКА АВТОРИЗАЦІЇ З ПАРОЛЯМИ ТА PIN-КОДОМ ---
 
 let isWholesaleMode = false;
 
@@ -73,7 +85,6 @@ async function handleRegister(event) {
     submitBtn.innerText = "Перевірка...";
     submitBtn.disabled = true;
 
-    // 1. ПЕРЕВІРКА PIN-КОДУ (якщо вибрано опт)
     if (isWholesaleMode) {
         const pin = document.getElementById('wsPinCode').value.trim();
         if (!pin) {
@@ -91,9 +102,9 @@ async function handleRegister(event) {
             const pinResult = await pinCheck.json();
             if (!pinResult.valid) {
                 alert("❌ Невірний PIN-код! Спробуйте ще раз або зверніться до менеджера.");
-                document.getElementById('wsPinCode').value = ''; // Очищаємо поле
+                document.getElementById('wsPinCode').value = ''; 
                 submitBtn.innerText = "Зареєструватися"; submitBtn.disabled = false;
-                return; // Відкидаємо назад!
+                return; 
             }
         } catch(e) {
             alert("Помилка з'єднання з сервером перевірки.");
@@ -105,7 +116,6 @@ async function handleRegister(event) {
     const isWholesaleStr = isWholesaleMode ? 'yes' : 'no';
     const userData = { action: "", name, phone: phone, isWholesale: isWholesaleStr, city, password }; 
 
-    // 2. РЕЄСТРАЦІЯ
     try {
         const response = await fetch(DATABASE_URL, {
             method: 'POST',
@@ -138,7 +148,6 @@ async function handleLogin(event) {
     const phoneInput = document.getElementById('loginPhone');
     const passwordInput = document.getElementById('loginPassword');
     
-    // Перевіряємо, чи існують поля
     if (!phoneInput || !passwordInput) {
         alert("Помилка форми! Не знайдено поле телефону або пароля.");
         return;
@@ -147,7 +156,6 @@ async function handleLogin(event) {
     const phone = phoneInput.value.trim(); 
     const password = passwordInput.value.trim();
     
-    // Пасхалка для Адміна
     if (phone === "0000000000" || phone === "0689721598") {
         closeAuth(); document.getElementById('adminAuthModal').style.display = 'flex'; return; 
     }
@@ -168,7 +176,6 @@ async function handleLogin(event) {
         }
     } catch (e) { alert("Помилка підключення до бази."); }
 }
-// --- КІНЕЦЬ НОВОЇ ЛОГІКИ ---
 
 async function logout() {
     if(confirm("Ви дійсно хочете вийти?")) {
@@ -244,7 +251,6 @@ function renderWholesaleBanner() {
 let loadedCategories = []; 
 let currentEditCategoryId = null;
 
-// --- 1. ЗАВАНТАЖЕННЯ КАТЕГОРІЙ (РОЗДРІБ) ---
 async function loadCategories() {
     const container = document.getElementById('category-grid-container');
     if (!container) return;
@@ -262,7 +268,6 @@ async function loadCategories() {
     } catch (error) { console.error("Помилка:", error); }
 }
 
-// --- 2. ЗАВАНТАЖЕННЯ КАТЕГОРІЙ (ОПТОВИХ) ---
 async function loadWholesaleCategories() {
     const container = document.getElementById('ws-category-container');
     if (!container) return;
@@ -276,7 +281,6 @@ async function loadWholesaleCategories() {
         container.innerHTML = loadedCategories.map(cat => {
             const adminPanel = isAdmin ? `<div style="display:flex; justify-content:space-between; margin-top:8px;"><button onclick="event.stopPropagation(); editCategory('${cat.id}')" style="background:#f39c12; color:white; border:none; border-radius:5px; padding:5px; cursor:pointer; font-weight:bold; font-size:0.75rem; width:48%;">✏️ Редаг.</button><button onclick="event.stopPropagation(); deleteCategory('${cat.id}')" style="background:#e74c3c; color:white; border:none; border-radius:5px; padding:5px; cursor:pointer; font-weight:bold; font-size:0.75rem; width:48%;">🗑️ Видал.</button></div>` : '';
             
-            // МАГІЯ МАРШРУТИЗАЦІЇ: Автомобілі йдуть на старий файл, всі інші - на новий динамічний
             const targetLink = cat.id === 'ws_avto' ? 'wholesale.html' : `wholesale-dynamic.html?type=${cat.id}`;
 
             return `<div style="display: flex; flex-direction: column;"><div class="category-card" onclick="window.location.href='${targetLink}'"><img src="${cat.image_url}" alt="${cat.title}" onerror="this.src='default.jpg'"><span>${cat.title}</span></div>${adminPanel}</div>`;
@@ -369,12 +373,11 @@ async function initCategoryPage() {
 
 async function loadProducts(categoryId) {
     const container = document.getElementById('category-products-container');
-    if (!container) return; // Якщо ми не на сторінці з товарами - виходимо
+    if (!container) return; 
     
     const isAdmin = await isAdminUser();
 
     try {
-        // Формуємо запит до БД
         let query = supabaseClient.from('products').select('*').order('id', { ascending: false });
         if (categoryId) {
             query = query.eq('category_id', categoryId);
@@ -383,7 +386,6 @@ async function loadProducts(categoryId) {
         const { data, error } = await query;
         if (error) throw error;
 
-        // ФІЛЬТРУЄМО СИСТЕМНІ ТОВАРИ ОДРАЗУ ТУТ
         loadedProducts = (data || []).filter(prod => !prod.title.startsWith('[SYSTEM_'));
 
         if (loadedProducts.length === 0) {
@@ -391,11 +393,11 @@ async function loadProducts(categoryId) {
             return;
         }
 
-        container.innerHTML = ''; // Очищаємо контейнер
+        container.innerHTML = ''; 
         
         const isWholesale = isWholesaleUser();
 
-        // Рендеримо кожен товар
+       // Рендеримо кожен товар (ВИПРАВЛЕНІ ЛАПКИ ДЛЯ ID)
         loadedProducts.forEach(product => {
             const priceHtml = isWholesale
                 ? `<div class="price" style="color:#111;">${Math.round(product.price * 0.6)} грн <span style="text-decoration:line-through; color:#999; font-size:0.8rem;">${product.price} грн</span></div>`
@@ -403,16 +405,17 @@ async function loadProducts(categoryId) {
 
             const adminControls = isAdmin ? `
                 <div class="admin-controls" style="display: flex; gap: 5px; margin-top: 10px;">
-                    <button onclick="editProduct(${product.id})" style="flex: 1; background: #ffcc00; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight:bold;">✏️ Редагувати</button>
-                    <button onclick="deleteProduct(${product.id})" style="flex: 1; background: #ff4d4d; color: white; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight:bold;">🗑️ Видалити</button>
+                    <button onclick="editProduct('${product.id}')" style="flex: 1; background: #ffcc00; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight:bold;">✏️ Редагувати</button>
+                    <button onclick="deleteProduct('${product.id}')" style="flex: 1; background: #ff4d4d; color: white; border: none; padding: 8px; cursor: pointer; border-radius: 4px; font-weight:bold;">🗑️ Видалити</button>
                 </div>
             ` : '';
 
             const card = document.createElement('div');
             card.className = 'product-card';
+            // ТУТ ТЕЖ ДОДАНО ЛАПКИ '${product.id}'
             card.innerHTML = `
-                <img src="${product.main_image}" alt="${product.title}" onclick="goToProduct(${product.id})" style="cursor:pointer; width:100%; border-radius:8px; object-fit:cover; aspect-ratio:4/3; transition:0.3s;">
-                <h3 onclick="goToProduct(${product.id})" style="cursor:pointer; font-size:1.1rem; margin:10px 0;">${product.title}</h3>
+                <img src="${product.main_image}" alt="${product.title}" onclick="goToProduct('${product.id}')" style="cursor:pointer; width:100%; border-radius:8px; object-fit:cover; aspect-ratio:4/3; transition:0.3s;">
+                <h3 onclick="goToProduct('${product.id}')" style="cursor:pointer; font-size:1.1rem; margin:10px 0;">${product.title}</h3>
                 ${priceHtml}
                 ${adminControls}
             `;
@@ -422,6 +425,10 @@ async function loadProducts(categoryId) {
         console.error("Помилка БД:", error);
         container.innerHTML = '<p style="text-align:center; color:red; width:100%; padding: 40px 0;">Сталася помилка при завантаженні товарів.</p>';
     }
+}
+
+function goToProduct(id) {
+    window.location.href = `product.html?id=${id}`;
 }
 
 function openAddProductModal() { 
@@ -630,7 +637,7 @@ async function addDynamicProductToCart() {
                 localStorage.setItem('pendingFileBase64', fileData);
             } catch (e) {
                 alert("Пам'ять браузера переповнена! Ми не змогли прикріпити фото, але ви можете додати товар без нього і відправити фото нам у Telegram.");
-                hasFile = false; // Скидаємо прапорець, бо фото не збереглося
+                hasFile = false; 
             }
         }
     }
@@ -648,11 +655,30 @@ async function addDynamicProductToCart() {
 }
 
 // ==========================================
-// 5. КОШИК ТА ОФОРМЛЕННЯ
+// 5. КОШИК ТА ОФОРМЛЕННЯ (ІНТЕГРОВАНО)
 // ==========================================
-let cart = JSON.parse(localStorage.getItem('levkovo_cart')) || [];
+const isWholesaleCabinet = window.location.pathname.includes('wholesale');
+const CART_STORAGE_KEY = isWholesaleCabinet ? 'levkovo_ws_cart' : 'levkovo_cart';
 
-function saveCart() { localStorage.setItem('levkovo_cart', JSON.stringify(cart)); updateCartCount(); }
+let cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) || [];
+
+function saveCart() { 
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); 
+    updateCartCount(); 
+    updateWholesaleCartCount();
+}
+
+function updateWholesaleCartCount() {
+    const wsCountElement = document.getElementById('wholesale-cart-count');
+    if (wsCountElement) {
+        wsCountElement.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
+    }
+}
+
+function openWholesaleCart() {
+    openCart(); 
+}
+
 function getPrice(basePrice, quantity) { return basePrice; }
 
 function renderCart() {
@@ -665,7 +691,6 @@ function renderCart() {
         const currentPrice = getPrice(item.price, item.qty);
         if (item.selected) total += currentPrice * item.qty;
         
-        // Зчитуємо крок оптової партії (для роздрібу буде 1)
         const step = item.step || 1;
 
         container.innerHTML += `
@@ -742,7 +767,6 @@ async function autoRegisterGuest(name, phone) {
 async function generateReceipt(event) {
     event.preventDefault();
 
-    // 1. БЛОКУВАННЯ ЗАМОВЛЕНЬ-ПРИВИДІВ
     const itemsForDB = cart.filter(i => i.selected);
     if (itemsForDB.length === 0) {
         alert("КРИТИЧНА ПОМИЛКА: Кошик порожній або товари не вибрані!");
@@ -772,7 +796,6 @@ async function generateReceipt(event) {
     const callback = document.getElementById('callbackMethod')?.value === 'yes' ? "Дзвонити" : "Не дзвонити";
     const shipMethod = document.getElementById('shippingMethod')?.value;
     
-    // 2. БЛОКУВАННЯ ПУСТОЇ ДОСТАВКИ
     let addressInfo = "";
     if (shipMethod === 'nova') {
         const npCity = document.getElementById('npCity')?.value.trim();
@@ -825,7 +848,6 @@ async function generateReceipt(event) {
             localStorage.removeItem('pendingFileBase64');
         }
 
-        // Очищаємо ТІЛЬКИ оформлені товари
         cart = cart.filter(i => !i.selected); 
         saveCart(); 
         closeCheckout();
@@ -835,6 +857,7 @@ async function generateReceipt(event) {
         console.error("Checkout Error:", e);
     }
 }
+
 function autofillCheckoutData() {
     const userRaw = localStorage.getItem('currentUser');
     if (!userRaw) return;
@@ -856,16 +879,33 @@ function autofillCheckoutData() {
 }
 
 // ==========================================
-// 6. ІНТЕРФЕЙС (ДОПОМІЖНІ ФУНКЦІЇ)
+// 6. ІНТЕРФЕЙС (ДОПОМІЖНІ ФУНКЦІЇ ТА БРОНЯ)
 // ==========================================
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    const menuBtn = document.getElementById('menuBtn');
-    if (menuBtn) menuBtn.classList.toggle('open');
-    if (!sidebar.classList.contains('active')) {
-        sidebar.style.display = 'block'; setTimeout(() => sidebar.classList.add('active'), 10);
+    
+    // БРОНЯ ВІД КРАШУ: Якщо сайдбару немає в HTML - система скаже про це, а не вмре
+    if (!sidebar) {
+        alert("КРИТИЧНА ПОМИЛКА: У цьому HTML-файлі відсутній код сайдбару (<div id='sidebar'>). Скопіюй його сюди!");
+        return;
+    }
+    
+    let overlay = document.getElementById('sidebar-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sidebar-overlay';
+        overlay.className = 'body-overlay';
+        overlay.onclick = toggleSidebar;
+        document.body.appendChild(overlay);
+    }
+
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+
+    if(sidebar.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
     } else {
-        sidebar.classList.remove('active'); setTimeout(() => sidebar.style.display = 'none', 500);
+        document.body.style.overflow = '';
     }
 }
 
@@ -909,7 +949,6 @@ function updateQtyInput(index, value) {
     const step = cart[index].step || 1;
     let newQty = parseInt(value); 
     if (newQty > 0) {
-        // Жорстке вирівнювання: якщо партія 47, а ввели 50, округлить до 47
         if (step > 1) newQty = Math.round(newQty / step) * step;
         if (newQty === 0) newQty = step;
         cart[index].qty = newQty; 
@@ -919,7 +958,7 @@ function updateQtyInput(index, value) {
     saveCart();
     renderCart(); 
 }
-function fastTransition(element) { element.classList.add('logo-boom'); setTimeout(() => { window.location.href = 'about.html'; }, 150); }
+
 function openContacts() { const sidebar = document.getElementById('sidebar'); if (sidebar && sidebar.classList.contains('active')) toggleSidebar(); document.getElementById('contactsModal').style.display = 'flex'; }
 function closeContacts() { document.getElementById('contactsModal').style.display = 'none'; }
 window.onclick = function(event) { if (event.target == document.getElementById('contactsModal')) closeContacts(); }
@@ -941,6 +980,49 @@ function renderReceiptOverlay(total, itemsHtml) {
 }
 
 function handleFileChange(input) { document.getElementById('file-filename').innerText = input.files.length > 0 ? input.files[0].name : "Файл не вибрано"; }
+
+// Мобільне меню товарів (Гармошка)
+function toggleSubmenu() {
+    const submenu = document.getElementById('mobile-categories-list');
+    const arrow = document.getElementById('submenu-arrow');
+    if (submenu.classList.contains('open')) {
+        submenu.classList.remove('open');
+        arrow.style.transform = 'rotate(0deg)';
+    } else {
+        submenu.classList.add('open');
+        arrow.style.transform = 'rotate(180deg)';
+        if (submenu.innerHTML.trim() === '') loadSidebarCategories();
+    }
+}
+
+// Розумне завантаження категорій (ТІЛЬКИ РОЗДРІБ, як ти і просив)
+async function loadSidebarCategories() {
+    const container = document.getElementById('mobile-categories-list');
+    if(!container) return;
+    
+    try {
+        // Ми беремо з бази ВСІ категорії, відсортовані за алфавітом
+        const { data, error } = await supabaseClient.from('categories').select('*').order('title');
+        if (error) throw error;
+        
+        // ЖОРСТКИЙ ФІЛЬТР: Ми ігноруємо, хто користувач. 
+        // Ми просто відкидаємо ВСЕ, що починається на 'ws_' або має '[WS]'
+        const filteredCategories = (data || []).filter(cat => {
+            const titleStr = cat.title ? cat.title.toUpperCase() : '';
+            const idStr = cat.id ? String(cat.id).toLowerCase() : '';
+            return !idStr.startsWith('ws_') && !titleStr.includes('[WS]');
+        });
+        
+        // Вставляємо li тільки всередину нашої гармошки
+        container.innerHTML = filteredCategories.map(cat => `
+            <li><a href="category.html?type=${cat.id}" onclick="toggleSidebar();" style="font-size: 0.95rem; border: none; padding: 8px 0; color: #666;">• ${cat.title}</a></li>
+        `).join('');
+        
+    } catch (err) {
+        console.error("Помилка БД сайдбара:", err);
+        container.innerHTML = '<li><span style="color:red;">Помилка завантаження</span></li>';
+    }
+}
 
 // ==========================================
 // 7. НОВА ПОШТА (JQUERY)
@@ -977,51 +1059,6 @@ function setupWarehouseSearch(cityRef) {
 }
 function selectWarehouse(name) { $('#npWarehouse').val(name); $('.autocomplete-list').hide(); }
 
-
-// ==========================================
-// ЄДИНИЙ МАЙСТЕР-ЗАПУСК УСІХ СИСТЕМ ПРИ ЗАВАНТАЖЕННІ
-// ==========================================
-window.addEventListener('DOMContentLoaded', () => {
-    // 1. Оновлення профілю та кошика (з затримкою для надійності)
-    setTimeout(() => {
-        updateProfileUI();    
-        if (typeof updateCartCount === "function") updateCartCount();   
-        if (window.location.hash === '#cart') {
-            history.replaceState(null, null, window.location.pathname);
-            if (typeof openCart === "function") openCart(); 
-        }
-    }, 100);
-
-    // 2. Оптовий каталог
-    if (document.getElementById('ws-category-container')) {
-        loadWholesaleCategories();
-        checkAdminForCategories();
-    } 
-    // 3. Звичайний каталог (Роздріб)
-    else if (document.getElementById('category-grid-container')) {
-        loadCategories();
-        checkAdminForCategories();
-    }
-
-    // 4. Головна сторінка (Популярні товари)
-    if (document.getElementById('is-homepage')) {
-        loadProducts('popular');
-        checkAdminForProducts();
-    }
-
-    // 5. Сторінка конкретної категорії
-    if (document.getElementById('dynamic-category-title')) {
-        initCategoryPage();
-    }
-
-    // 6. Сторінка одного товару
-    if (document.getElementById('prod-title')) {
-        initSingleProductPage(); 
-    }
-
-    // 7. Банери
-    setTimeout(renderWholesaleBanner, 150);
-});
 // ==========================================
 // 8. СИСТЕМА ВІДГУКІВ (КАРУСЕЛЬ)
 // ==========================================
@@ -1031,26 +1068,19 @@ let reviewsDbId = null;
 
 async function loadReviewsFromDB() {
     try {
-        // Шукаємо технічний запис з відгуками
         const { data, error } = await supabaseClient.from('products').select('*').eq('title', '[SYSTEM_REVIEWS]').maybeSingle();
-        if (data) {
-            reviewsDbId = data.id;
-            reviewImages = data.features?.gallery || [];
-        }
-    } catch(e) { console.warn("Відгуки ще не створені"); }
+        if (data) { reviewsDbId = data.id; reviewImages = data.features?.gallery || []; }
+    } catch(e) {}
 }
 
 async function openReviewsModal() {
-    // Закриваємо бокове меню, якщо воно відкрите
     const sidebar = document.getElementById('sidebar');
     if (sidebar && sidebar.classList.contains('active')) toggleSidebar();
     
     await loadReviewsFromDB();
     const isAdmin = await isAdminUser();
     
-    // Показуємо кнопки тільки для адміна
     document.getElementById('admin-add-review-btn').style.display = isAdmin ? 'block' : 'none';
-    
     const display = document.getElementById('review-image-display');
     const noMsg = document.getElementById('no-reviews-msg');
     const delBtn = document.getElementById('admin-delete-review-btn');
@@ -1066,14 +1096,10 @@ async function openReviewsModal() {
         noMsg.style.display = 'block';
         delBtn.style.display = 'none';
     }
-    
     document.getElementById('reviewsModal').style.display = 'flex';
 }
 
-function closeReviewsModal() {
-    document.getElementById('reviewsModal').style.display = 'none';
-}
-
+function closeReviewsModal() { document.getElementById('reviewsModal').style.display = 'none'; }
 function changeReview(step) {
     if (reviewImages.length === 0) return;
     currentReviewIndex += step;
@@ -1082,14 +1108,11 @@ function changeReview(step) {
     document.getElementById('review-image-display').src = reviewImages[currentReviewIndex];
 }
 
-// --- АДМІНСЬКА ЧАСТИНА ---
 async function syncReviewsToDB() {
-    // Зберігаємо відгуки у фейковому товарі (щоб не ламати структуру таблиць)
     const payload = { category_id: 'popular', title: '[SYSTEM_REVIEWS]', main_image: 'system', price: 0, features: { gallery: reviewImages } };
     try {
-        if (reviewsDbId) {
-            await supabaseClient.from('products').update(payload).eq('id', reviewsDbId);
-        } else {
+        if (reviewsDbId) await supabaseClient.from('products').update(payload).eq('id', reviewsDbId);
+        else {
             const { data } = await supabaseClient.from('products').insert([payload]).select();
             if(data && data.length > 0) reviewsDbId = data[0].id;
         }
@@ -1101,12 +1124,66 @@ async function addReviewImage() {
     if (!url || !url.trim()) return;
     reviewImages.push(url.trim());
     await syncReviewsToDB();
-    openReviewsModal(); // Оновлюємо модалку
+    openReviewsModal();
 }
 
 async function deleteCurrentReview() {
     if (!confirm("Видалити цей скріншот відгуку?")) return;
     reviewImages.splice(currentReviewIndex, 1);
     await syncReviewsToDB();
-    openReviewsModal(); // Оновлюємо модалку
+    openReviewsModal();
 }
+// ==========================================
+// УНІВЕРСАЛЬНЕ ВІДКРИТТЯ ЮРИДИЧНИХ ВІКОН
+// ==========================================
+function openLegalModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        alert("КРИТИЧНА ПОМИЛКА: Вікно '" + modalId + "' не знайдено у цьому файлі HTML. Встав його код!");
+    }
+}
+// ==========================================
+// 9. ЄДИНИЙ МАЙСТЕР-ЗАПУСК УСІХ СИСТЕМ
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    
+    setTimeout(() => {
+        updateProfileUI();    
+        if (typeof updateCartCount === "function") updateCartCount();   
+        if (typeof updateWholesaleCartCount === "function") updateWholesaleCartCount(); 
+        
+        if (window.location.hash === '#cart') {
+            history.replaceState(null, null, window.location.pathname);
+            if (isWholesaleCabinet) {
+                if (typeof openWholesaleCart === "function") openWholesaleCart();
+            } else {
+                if (typeof openCart === "function") openCart(); 
+            }
+        }
+    }, 100);
+
+    if (document.getElementById('ws-category-container')) {
+        loadWholesaleCategories();
+        checkAdminForCategories();
+    } else if (document.getElementById('category-grid-container')) {
+        loadCategories();
+        checkAdminForCategories();
+    }
+
+    if (document.getElementById('is-homepage')) {
+        loadProducts('popular');
+        checkAdminForProducts();
+    }
+
+    if (document.getElementById('dynamic-category-title')) {
+        initCategoryPage();
+    }
+
+    if (document.getElementById('prod-title')) {
+        initSingleProductPage(); 
+    }
+
+    setTimeout(renderWholesaleBanner, 150);
+});

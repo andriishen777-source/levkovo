@@ -21,46 +21,8 @@ header { text-align: center; padding: 20px; }
 
 .cart-count { background: #8b4513; padding: 2px 6px; border-radius: 50%; font-size: 12px; }
 
-/* Нове бокове меню з ефектом росту */
-.sidebar {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    width: 280px;
-    background: white;
-    z-index: 1001;
-    padding: 25px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    border-radius: 20px;
-    
-    /* Початковий стан (сховано) */
-    display: none; 
-    opacity: 0;
-    transform: scale(0.1);
-    transform-origin: top left; /* Росте з кнопки меню */
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
 
-/* Стан, коли меню відкрите */
-.sidebar.active {
-    display: block;
-    opacity: 1;
-    transform: scale(1);
-}
 
-/* Пункти меню з'являються по черзі */
-.sidebar li {
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-    opacity: 0;
-    transform: translateX(-15px);
-    transition: 0.4s;
-}
-
-.sidebar.active li {
-    opacity: 1;
-    transform: translateX(0);
-}
 
 /* Каталог */
 .catalog { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
@@ -190,13 +152,15 @@ header { text-align: center; padding: 20px; }
     right: -5px;
     border: 2px solid #1a1a1a;
 }
-/* Елегантна анімація кнопки "три палки" */
+/* ========================================= */
+/* БРОНЕБІЙНА КНОПКА НАВІГАЦІЇ (БУРГЕР)      */
+/* ========================================= */
 .menu-icon {
     width: 30px;
     height: 20px;
     position: relative;
     cursor: pointer;
-    z-index: 1100;
+    z-index: 1001; /* Завжди поверх усього */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -206,11 +170,12 @@ header { text-align: center; padding: 20px; }
     display: block;
     width: 100%;
     height: 3px;
-    background-color: white;
+    background-color: #fff; /* Білі смужки */
     border-radius: 3px;
     transition: all 0.3s ease-in-out;
 }
 
+/* Якщо кнопка в оптовому кабінеті, смужки можуть бути іншого кольору, але поки залишимо білими */
 /* Перетворення в хрестик */
 .menu-icon.open span:nth-child(1) {
     transform: translateY(8.5px) rotate(45deg);
@@ -223,60 +188,72 @@ header { text-align: center; padding: 20px; }
 }
 
 /* Елегантний дизайн меню */
+/* ========================================= */
+/* ПРАВИЛЬНИЙ МІБІЛЬНИЙ САЙДБАР (iOS СУМІСНИЙ) */
+/* ========================================= */
+/* ========================================= */
+/* БІЛЕ АКУРАТНЕ ВІКОНЦЕ (iOS СУМІСНЕ) */
+/* ========================================= */
 .sidebar {
     position: fixed;
-    top: 15px;
-    left: 15px;
-    width: 260px;
-    background: rgba(255, 255, 255, 0.95); /* Напівпрозорий білий */
-    backdrop-filter: blur(10px); /* Ефект розмиття фону */
-    z-index: 1050;
-    padding: 40px 25px;
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    top: 15px; /* Відступ зверху */
+    left: -100%; /* Заховано */
+    width: 85vw; 
+    max-width: 350px;
+    height: calc(100vh - 30px); /* Висота екрану мінус відступи = бульбашка */
+    background-color: #ffffff; /* Білий преміальний фон */
+    color: #111; /* Чорний текст */
+    border-radius: 24px; /* Твої заокруглені краї */
+    transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 100000;
     
-    display: none;
-    opacity: 0;
-    transform: scale(0.8) translateY(-20px);
-    transform-origin: top left;
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow-y: auto !important; /* Жорсткий скрол, щоб не вилазило */
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; 
+    
+    padding: 20px 25px;
+    box-sizing: border-box;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2); /* Тінь для ефекту левітації */
 }
 
 .sidebar.active {
-    display: block;
-    opacity: 1;
-    transform: scale(1) translateY(0);
+    left: 15px; /* Виїжджає, залишаючи відступ зліва */
 }
 
-/* Стиль посилань у меню */
-.sidebar ul { list-style: none; padding: 0; margin: 0; }
-
-.sidebar li {
-    margin: 15px 0;
-    opacity: 0;
-    transform: translateX(-20px);
-    transition: 0.4s ease;
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.sidebar.active li { opacity: 1; transform: translateX(0); }
-
-.sidebar a {
+.sidebar ul li a {
+    color: #333; /* Темно-сірий текст */
     text-decoration: none;
-    color: #1a1a1a;
+    display: block;
+    padding: 12px 0;
     font-size: 1.1rem;
     font-weight: 500;
-    transition: color 0.3s;
+    border-bottom: 1px solid #eee; /* Світла акуратна лінія */
 }
 
-.sidebar a:hover { color: #8b4513; }
-/* Базовий вигляд хрестика в рядку товару */
-.runaway-delete {
-    cursor: pointer;
-    color: #999;
-    font-weight: bold;
-    font-size: 1.2rem;
-    padding: 5px;
-    transition: 0.2s;
+.sidebar ul li a:hover {
+    color: #b8860b; /* Золотий акцент при натисканні */
+}
+
+/* Затемнення заднього фону */
+.body-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5); /* Трохи світліше затемнення */
+    z-index: 99999;
+}
+
+.body-overlay.active {
+    display: block;
 }
 
 /* Стан, коли хрестик "втік" */
@@ -896,4 +873,150 @@ select, .levkovo-input select {
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;
+}
+/* ========================================= */
+/* БОЙОВИЙ ПАТЧ ДЛЯ МОБІЛЬНИХ ПРИСТРОЇВ (iOS) */
+/* ========================================= */
+
+/* 1. Вбиваємо горизонтальний скрол (щоб сайт не тікав) */
+html, body {
+    overflow-x: hidden !important;
+    width: 100%;
+    position: relative;
+    max-width: 100vw;
+}
+
+/* 2. Забороняємо iOS зумити екран при введенні тексту */
+input, textarea, select {
+    font-size: 16px !important;
+}
+
+/* 3. Вбиваємо потворні сині селектори Apple і робимо їх преміальними */
+select, .modal-content select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #fafafa;
+    color: #111 !important;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    font-size: 16px !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 1em;
+}
+
+/* 4. Лікуємо зависання модалок і фоновий скрол */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    z-index: 99999;
+    padding: 20px 0;
+    box-sizing: border-box;
+}
+
+/* 5. Вирівнюємо мобільне меню (навігацію), щоб воно не вилазило за екран */
+#mobileMenu, .mobile-menu {
+    max-width: 85vw !important; /* Меню займатиме максимум 85% екрану */
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* НОВІ СТИЛІ ДЛЯ ВКЛАДЕНОГО МЕНЮ ТОВАРІВ */
+.mobile-sub-menu {
+    display: none; /* Сховано за замовчуванням */
+    list-style: none;
+    padding-left: 20px; /* Відступ для ієрархії */
+    border-left: 2px solid #ccc; /* Лінія-покажчик */
+    margin: 5px 0;
+    transition: 0.3s;
+}
+
+.mobile-sub-menu.open {
+    display: block; /* Показати */
+}
+
+.mobile-sub-menu li a {
+    font-size: 0.95rem !important; /* Трохи менший шрифт */
+    color: #444 !important;
+    padding: 8px 0;
+    font-weight: normal;
+}
+/* ========================================= */
+/* ПРЕМІАЛЬНІ АНІМАЦІЇ LEVKOVO             */
+/* ========================================= */
+
+/* 1. Плавна гармошка для "Товарів" */
+.submenu-accordion {
+    list-style: none;
+    padding-left: 15px;
+    margin: 0;
+    max-height: 0; /* Сховано за замовчуванням */
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out;
+}
+
+.submenu-accordion.open {
+    max-height: 400px; /* Відкривається плавно */
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+/* 2. Анімація появи ВСІХ вікон (замість кривого "Джина") */
+@keyframes premiumFadeInScale {
+    0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-content {
+    animation: premiumFadeInScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* 3. Ексклюзивна кнопка Оптового кабінету (Металевий відблиск) */
+.b2b-premium-btn {
+    position: relative;
+    overflow: hidden;
+    background: #ffd700;
+    color: #111;
+    font-weight: bold;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    transition: transform 0.2s;
+}
+
+.b2b-premium-btn:active {
+    transform: scale(0.98);
+}
+
+/* Сам ефект світлового бліку */
+.b2b-premium-btn::after {
+    content: '';
+    position: absolute;
+    top: 0; 
+    left: -100%; 
+    width: 50%; 
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    animation: luxuryShine 3.5s infinite;
+}
+
+@keyframes luxuryShine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; }
 }

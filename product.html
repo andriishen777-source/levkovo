@@ -9,14 +9,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        .product-page-container { padding: 20px; max-width: 600px; margin: 80px auto 20px auto; } /* Додав margin-top 80px через фіксований навбар */
+        .product-page-container { padding: 20px; max-width: 600px; margin: 80px auto 20px auto; }
         .product-main-img { width: 100%; border-radius: 12px; object-fit: cover; aspect-ratio: 4/3; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .product-details { margin-top: 20px; text-align: left; }
         .price-big { font-size: 1.5rem; margin: 15px 0; }
         .options-section { margin: 20px 0; }
         select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; }
-        
-        /* Стиль для активного кольору */
         .dyn-color-circle { box-sizing: border-box; }
         .dyn-color-circle.active { border: 3px solid #ffd700 !important; transform: scale(1.15) !important; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
@@ -36,6 +34,41 @@
             <span class="cart-count" id="cart-count" style="position: absolute; top: -6px; right: -6px; background: #888; color: white; border-radius: 50%; padding: 2px 5px; font-size: 0.7rem; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">0</span>
         </div>
     </div>
+</div>
+
+<div id="sidebar" class="sidebar">
+    <div style="text-align: right; cursor: pointer; font-size: 1.8rem; padding: 10px 20px; color: #111;" onclick="toggleSidebar()">✕</div>
+    <h2 style="color: #111; text-align: center; margin-top: 0; margin-bottom: 25px; letter-spacing: 2px;">LEVKOVO</h2>
+    <ul style="padding-bottom: 40px;">
+        <li><a href="index.html">Головна</a></li>
+        <li>
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 12px 0; border-bottom: 1px solid #eee;" onclick="toggleSubmenu()">
+                <strong style="color: #333; font-size: 1.1rem; font-weight: 500;">Товари</strong>
+                <span id="submenu-arrow" style="color: #111; font-size: 1.2rem; transition: transform 0.3s;">▼</span>
+            </div>
+            <ul id="mobile-categories-list" class="submenu-accordion"></ul>
+        </li>
+        <li><a href="#" onclick="openReviewsModal(); toggleSidebar(); return false;" style="color: #b8860b;">Відгуки клієнтів</a></li>
+        
+        <li id="profile-link-li" style="margin-top: 10px; border-top: 2px solid #f5f5f5; padding-top: 10px; padding-bottom: 15px;">
+            <a href="#" onclick="login(); toggleSidebar(); return false;" style="font-weight: bold; color: #111;">Мій Профіль / Реєстрація</a>
+        </li>
+
+        <li style="margin-top: 20px;">
+            <ul style="list-style: none; padding: 0; border-left: 2px solid #eee; padding-left: 15px;">
+                <li><a href="#" onclick="openLegalModal('deliveryModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Оплата і доставка</a></li>
+                <li><a href="#" onclick="openLegalModal('returnModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Обмін та повернення</a></li>
+                <li><a href="#" onclick="openLegalModal('offerModal'); toggleSidebar(); return false;" style="font-size: 0.85rem; color: #999; padding: 5px 0; border: none;">Публічна оферта</a></li>
+            </ul>
+        </li>
+
+        <li style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
+            <a href="about.html" style="display: block; font-size: 0.95rem; color: #666; font-weight: 500; border: none; transition: 0.2s;"><h3> Про нас</h3></a>
+            <a href="#" onclick="openContacts(); toggleSidebar(); return false;" style="display: block; font-size: 1.3rem; font-weight: 800; color: #111; padding-bottom: 5px; border: none; transition: 0.2s;">
+            📞 Контакти
+        </a>
+        </li>
+    </ul> 
 </div>
 
 <div class="product-page-container">
@@ -75,7 +108,7 @@
         </div>
     </div>
 
-   <button class="btn-buy" onclick="addDynamicProductToCart()" style="width: 100%; padding: 18px; font-size: 1.2rem; border-radius: 12px; background-color: #111; color: #ffd700; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">ДОДАТИ В КОШИК</button>
+    <button class="btn-buy" onclick="addDynamicProductToCart()" style="width: 100%; padding: 18px; font-size: 1.2rem; border-radius: 12px; background-color: #111; color: #ffd700; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">ДОДАТИ В КОШИК</button>
 </div>
 
 <div id="cartModal" class="modal-overlay" style="display:none;">
@@ -156,6 +189,24 @@
 <div id="receiptOverlay" class="modal-overlay" style="display:none;">
     <div class="modal-content receipt-box" id="receiptPrint"></div>
 </div>
+
+<div id="authModal" class="modal-overlay" style="display: none; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 100000; align-items: center; justify-content: center;">
+    <div class="modal-content auth-container" style="background: #fff; width: 90%; max-width: 400px; border-radius: 16px; padding: 30px; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; font-family: 'Segoe UI', sans-serif;">
+        <span class="modal-close-x" onclick="closeAuth()" style="position: absolute; top: 15px; right: 20px; font-size: 24px; color: #888; cursor: pointer; transition: 0.2s;">✕</span>
+        <div id="authChoice">
+            <h2 style="color: #111; margin-bottom: 25px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Вітаємо в LEVKOVO</h2>
+            <button onclick="showLogin()" style="width: 100%; padding: 14px; margin-bottom: 15px; background: #111; color: #ffd700; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s;">УВІЙТИ</button>
+            <button onclick="showRegister()" style="width: 100%; padding: 14px; background: #f9f9f9; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s;">СТВОРИТИ АКАУНТ</button>
+        </div>
+        <form id="registerForm" style="display: none; text-align: left;" onsubmit="handleRegister(event)">
+            <button type="submit" id="regSubmitBtn" style="width: 100%; padding: 14px; background: #111; color: #ffd700; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Зареєструватися</button>
+        </form>
+        <form id="loginForm" style="display: none; text-align: left;" onsubmit="handleLogin(event)">
+            <button type="submit" style="width: 100%; padding: 14px; background: #111; color: #ffd700; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Увійти</button>
+        </form>
+    </div>
+</div>
+
 <footer style="background: #111; color: #ccc; padding: 50px 20px 20px; margin-top: 60px; font-family: 'Segoe UI', sans-serif; border-top: 3px solid #ffd700;">
     <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between;">
         
@@ -227,18 +278,11 @@
     </div>
 </div>
 
-<script>
-    function openLegalModal(modalId) {
-        document.getElementById(modalId).style.display = 'flex';
-    }
-</script>
-
 <script src="script.js"></script>
 
 <script>
-    // Ця функція ПЕРЕЗАПИСУЄ ту, що в script.js, спеціально для цієї сторінки
+    // ПЕРЕМИКАННЯ ФОТОГРАФІЙ ПРИ ВИБОРІ КОЛЬОРУ
     function selectDynamicColor(element, colorName) {
-        // 1. Оновлюємо візуал кружечків
         document.querySelectorAll('.dyn-color-circle').forEach(el => { 
             el.classList.remove('active');
             el.style.border = '1px solid #ccc'; 
@@ -248,11 +292,8 @@
         element.style.border = '3px solid #ffd700';
         element.style.transform = 'scale(1.15)';
         
-        // 2. Зберігаємо вибране значення
         document.getElementById('selectedColorValue').value = colorName;
 
-        // 3. БОНУС: Змінюємо головне фото!
-        // Знаходимо англійський ключ кольору (напр., 'black') по його українській назві
         let engColorKey = null;
         for (const [key, value] of Object.entries(dictColors)) {
             if (value.name === colorName) {
@@ -262,13 +303,10 @@
         }
         
         if (engColorKey) {
-            // Формуємо назву файлу (напр., black.jpg)
             const imgName = engColorKey + '.jpg';
-            // Шукаємо в галереї мініатюр картинку з такою назвою
             const thumbnails = document.getElementById('prod-thumbnails').getElementsByTagName('img');
             for (let i = 0; i < thumbnails.length; i++) {
                 if (thumbnails[i].src.includes(imgName)) {
-                    // Якщо знайшли - ставимо її головною
                     document.getElementById('prod-img').src = thumbnails[i].src;
                     break;
                 }
@@ -276,6 +314,29 @@
         }
     }
 </script>
+<div id="reviewsModal" class="modal-overlay" style="display:none; z-index: 100000; background: rgba(0,0,0,0.92); backdrop-filter: blur(5px); align-items: center; justify-content: center;">
+    
+    <span onclick="closeReviewsModal()" style="position: absolute; top: 20px; right: 25px; font-size: 35px; color: #fff; cursor: pointer; z-index: 101; transition: 0.2s;">&times;</span>
+    
+    <button id="admin-add-review-btn" onclick="addReviewImage()" style="display:none; position: absolute; top: 25px; left: 20px; background: #ffd700; color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; z-index: 101;">
+        + Додати скріншот
+    </button>
 
+    <div style="position: relative; width: 100%; max-width: 450px; height: 85vh; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+        
+        <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <button onclick="changeReview(-1)" style="position: absolute; left: 0; background: transparent; color: rgba(255,255,255,0.7); border: none; font-size: 3rem; cursor: pointer; z-index: 10; padding: 20px;">&#10094;</button>
+            
+            <img id="review-image-display" src="" style="max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div id="no-reviews-msg" style="color: #888; font-size: 1.2rem; display: none;">Відгуків поки немає 😔</div>
+            
+            <button onclick="changeReview(1)" style="position: absolute; right: 0; background: transparent; color: rgba(255,255,255,0.7); border: none; font-size: 3rem; cursor: pointer; z-index: 10; padding: 20px;">&#10095;</button>
+        </div>
+
+        <button id="admin-delete-review-btn" onclick="deleteCurrentReview()" style="display:none; margin-top: 15px; background: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            🗑️ Видалити це фото
+        </button>
+    </div>
+</div>
 </body>
 </html>
