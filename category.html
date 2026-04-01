@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="analytics.js"></script>
 </head>
 
 <body>
@@ -146,6 +147,14 @@
                 <div id="checkout-items"></div>
                 <div id="checkout-total" style="font-weight: bold; margin-top: 10px; font-size: 1.1rem; color: #8b4513;"></div>
             </div>
+            <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px dashed #ccc; margin-top: 15px; margin-bottom: 15px;">
+    <strong style="display:block; margin-bottom: 5px; font-size: 0.9rem;">Є промокод? (не обов'язково):</strong>
+    <div style="display: flex; gap: 5px;">
+        <input type="text" id="promoCodeInput" class="levkovo-input" placeholder="Введіть код" style="text-transform: uppercase; width: 100%; box-sizing: border-box; transition: 0.3s;">
+        <button type="button" onclick="checkPromoCode()" style="background: #111; color: white; border: none; border-radius: 5px; padding: 0 15px; cursor: pointer; font-weight: bold;">Застосувати</button>
+    </div>
+    <div id="promo-status-msg" style="font-size: 0.8rem; margin-top: 5px; font-weight: bold;"></div>
+</div>
             <button type="submit" class="modal-btn btn-confirm" style="margin-top: 15px;">Підтвердити замовлення</button>
             
         </form>

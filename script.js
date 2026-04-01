@@ -567,7 +567,11 @@ async function initSingleProductPage() {
                 const c = dictColors[colorKey];
                 if(!c) return '';
                 const isActive = index === 0 ? 'border: 3px solid #000; transform: scale(1.1);' : 'border: 1px solid #ccc;';
-                if(index === 0) document.getElementById('selectedColorValue').value = c.name;
+               if(index === 0) {
+            document.getElementById('selectedColorValue').value = c.name;
+            const displaySpan = document.getElementById('color-display-text');
+            if(displaySpan) displaySpan.innerText = c.name;
+        }
                 return `<div onclick="selectDynamicColor(this, '${c.name}')" class="dyn-color-circle" style="width: 30px; height: 30px; border-radius: 50%; background-color: ${c.hex}; cursor: pointer; transition: 0.2s; ${isActive}" title="${c.name}"></div>`;
             }).join('');
         }
@@ -594,11 +598,50 @@ async function initSingleProductPage() {
     } catch (e) { titleEl.innerText = "Помилка завантаження"; }
 }
 
+// ==========================================
+// ВИБІР КОЛЬОРУ (ОБ'ЄДНАНА ФУНКЦІЯ: ТЕКСТ + ФОТО + ВИДІЛЕННЯ)
+// ==========================================
 function selectDynamicColor(element, colorName) {
-    document.querySelectorAll('.dyn-color-circle').forEach(el => { el.style.border = '1px solid #ccc'; el.style.transform = 'scale(1)'; });
-    element.style.border = '3px solid #000';
-    element.style.transform = 'scale(1.1)';
+    // 1. Оновлюємо візуальне виділення кружечків
+    document.querySelectorAll('.dyn-color-circle').forEach(el => { 
+        el.style.border = '1px solid #ccc'; 
+        el.style.transform = 'scale(1)'; 
+    });
+    element.style.border = '3px solid #000'; // або '#ffd700', як було в твоїй версії
+    element.style.transform = 'scale(1.15)';
+    
+    // 2. Записуємо значення для кошика
     document.getElementById('selectedColorValue').value = colorName;
+
+    // 3. ЗМІНЮЄМО ТЕКСТ БІЛЯ ЗАГОЛОВКА
+    const displaySpan = document.getElementById('color-display-text');
+    if(displaySpan) {
+        displaySpan.innerText = colorName;
+    }
+
+    // 4. МІНЯЄМО ВЕЛИКУ ФОТОГРАФІЮ (Якщо вона є в галереї)
+    let engColorKey = null;
+    for (const [key, value] of Object.entries(dictColors)) {
+        if (value.name === colorName) {
+            engColorKey = key;
+            break;
+        }
+    }
+    
+    if (engColorKey) {
+        // Ми шукаємо фотку не просто по назві "cognac.jpg", а по ключу, щоб працювало з будь-яким форматом (jpg/png)
+        const thumbnailsContainer = document.getElementById('prod-thumbnails');
+        if (thumbnailsContainer) {
+            const thumbnails = thumbnailsContainer.getElementsByTagName('img');
+            for (let i = 0; i < thumbnails.length; i++) {
+                // Якщо посилання на фото містить ключ кольору (напр. .../cognac.jpg або .../cognac_1.png)
+                if (thumbnails[i].src.toLowerCase().includes(engColorKey.toLowerCase())) {
+                    document.getElementById('prod-img').src = thumbnails[i].src;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 async function addDynamicProductToCart() {
@@ -739,7 +782,23 @@ function renderCheckoutSummary() {
             container.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom: 5px;"><span>${item.name} x${item.qty}</span><span>${actualPrice * item.qty} грн</span></div>`;
         }
     });
-    document.getElementById('checkout-total').innerText = `До сплати: ${total} грн`;
+
+    let finalTotal = total;
+    
+    // Якщо є промокод - рахуємо знижку
+    if (activePromo) {
+        const discountAmount = Math.round((total * activePromo.discount) / 100);
+        finalTotal = total - discountAmount;
+        container.innerHTML += `
+            <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-top: 10px; color: #28a745; font-weight: bold; padding-top: 10px; border-top: 1px dashed #ccc;">
+                <span>Знижка "${activePromo.code}" (-${activePromo.discount}%):</span>
+                <span>-${discountAmount} грн</span>
+            </div>
+        `;
+    }
+
+    document.getElementById('checkout-total').innerHTML = `До сплати: <span style="font-size: 1.2rem; color: #8b4513;">${finalTotal} грн</span>`;
+    window.checkoutFinalTotal = finalTotal; // Зберігаємо глобально для відправки
 }
 
 async function autoRegisterGuest(name, phone) {
@@ -817,7 +876,8 @@ async function generateReceipt(event) {
         return alert("Оберіть спосіб доставки!");
     }
 
-    const comment = document.getElementById('orderComment')?.value.trim() || "немає";
+    const baseComment = document.getElementById('orderComment')?.value.trim() || "немає";
+const comment = "Промокод: " + (activePromo ? activePromo.code + " (-" + activePromo.discount + "%)" : "немає") + " | Клієнт: " + baseComment;
 
     let totalSum = 0;
     const finalItems = itemsForDB.map(i => {
@@ -825,7 +885,7 @@ async function generateReceipt(event) {
         return { name: i.name, qty: i.qty, price: i.price };
     });
 
-    const message = `📦 **НОВЕ ЗАМОВЛЕННЯ (LEVKOVO)**\n\n👤 **Клієнт:** ${clientName}\n📞 **Тел:** +38 ${userPhone}\n🚚 **Доставка:** ${addressInfo}\n💳 **Оплата:** ${payMethod}\n📞 **Дзвінок:** ${callback}\n💬 **Коментар:** ${comment}\n\n🛒 **Товари:**\n${finalItems.map(i => `• ${i.name} [x${i.qty}]`).join('\n')}\n\n💰 **РАЗОМ: ${totalSum} грн**`;
+    const message = `📦 **НОВЕ ЗАМОВЛЕННЯ (LEVKOVO)**\n\n👤 **Клієнт:** ${clientName}\n📞 **Тел:** +38 ${userPhone}\n🚚 **Доставка:** ${addressInfo}\n💳 **Оплата:** ${payMethod}\n📞 **Дзвінок:** ${callback}\n💬 **Коментар:** ${comment}\n\n🛒 **Товари:**\n${finalItems.map(i => `• ${i.name} [x${i.qty}]`).join('\n')}\n\n💰 **РАЗОМ: ${window.checkoutFinalTotal} грн**`;
 
     try {
         await supabaseClient.from('orders').insert([{ 
@@ -833,7 +893,7 @@ async function generateReceipt(event) {
             phone: userPhone, 
             address: addressInfo, 
             items: finalItems, 
-            total_price: totalSum, 
+           total_price: window.checkoutFinalTotal,
             status: 'В обробці', 
             comment: `Оплата: ${payMethod}, Дзвінок: ${callback}, Коментар: ${comment}` 
         }]);
@@ -857,7 +917,11 @@ async function generateReceipt(event) {
         cart = cart.filter(i => !i.selected); 
         saveCart(); 
         closeCheckout();
-        renderReceiptOverlay(`${totalSum} грн`, finalItems.map(i => `• ${i.name} x${i.qty}`).join('<br>'));
+        // Зберігаємо дані глобально, щоб чек міг їх завантажити
+        window.currentReceiptData = { total: window.checkoutFinalTotal, items: finalItems, promo: activePromo }; 
+        
+        let promoText = activePromo ? `<br><span style="color:#28a745; font-size:0.85rem;">Знижка: -${activePromo.discount}%</span>` : '';
+        renderReceiptOverlay(`${window.checkoutFinalTotal} грн ${promoText}`, finalItems.map(i => `• ${i.name} x${i.qty}`).join('<br>'));
    } catch (e) { 
         alert("Сталася помилка при відправці замовлення. Спробуйте ще раз."); 
         console.error("Checkout Error:", e);
@@ -983,13 +1047,58 @@ function validatePhone(input) {
     else { container.style.borderColor = "#ff4d4d"; return false; }
 }
 
-function renderReceiptOverlay(total, itemsHtml) {
+// ==========================================
+// ФІНАЛЬНИЙ ЕКРАН ТА ГЕНЕРАЦІЯ ЧЕКА
+// ==========================================
+function renderReceiptOverlay(totalHtml, itemsHtml) {
     const overlay = document.getElementById('receiptOverlay');
     const printBox = document.getElementById('receiptPrint');
     if (overlay && printBox) {
-        printBox.innerHTML = `<h2 style="color: #8b4513;">Дякуємо за замовлення!</h2><p style="margin: 15px 0;">Ми отримали ваш запит і скоро зв'яжемося.</p><div style="text-align: left; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px dashed #ccc;"><strong>Ваші товари:</strong><br>${itemsHtml}<hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;"><div style="font-weight: bold; font-size: 1.1rem; text-align: right;">${total}</div></div><button class="modal-btn btn-confirm" style="margin-top: 20px;" onclick="location.reload()">На головну</button>`;
+        printBox.innerHTML = `
+            <h2 style="color: #8b4513; margin-top:0;">Дякуємо за замовлення!</h2>
+            <p style="margin: 15px 0; color: #555;">Ми отримали ваш запит і скоро зв'яжемося.</p>
+            <div style="text-align: left; background: #fdfdfd; padding: 15px; border-radius: 8px; border: 1px dashed #ccc;">
+                <strong style="color: #111;">Ваші товари:</strong><br>
+                <div style="color: #444; margin-top: 5px; line-height: 1.5;">${itemsHtml}</div>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <div style="font-weight: bold; font-size: 1.2rem; text-align: right; color: #111;">${totalHtml}</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 25px;">
+                <button style="background: #111; color: #ffd700; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onclick="downloadReceiptText()">📥 Завантажити чек</button>
+                <button style="background: #eee; color: #333; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;" onclick="location.reload()">На головну</button>
+            </div>
+        `;
         overlay.style.display = 'flex';
     }
+}
+
+// Функція-генератор файлу чека
+function downloadReceiptText() {
+    if (!window.currentReceiptData) return;
+    
+    let text = "=== ІНТЕРНЕТ-МАЙСТЕРНЯ LEVKOVO ===\n";
+    text += "ЧЕК ЗАМОВЛЕННЯ\n";
+    text += "Дата: " + new Date().toLocaleString('uk-UA') + "\n\n";
+    text += "ТОВАРИ:\n";
+    window.currentReceiptData.items.forEach(i => { 
+        text += `- ${i.name} (x${i.qty})\n`; 
+    });
+    text += "\n--------------------------------\n";
+    
+    if (window.currentReceiptData.promo) { 
+        text += `Промокод: ${window.currentReceiptData.promo.code} (-${window.currentReceiptData.promo.discount}%)\n`; 
+    }
+    text += `ДО СПЛАТИ: ${window.currentReceiptData.total} грн\n`;
+    text += "================================\n";
+    text += "Дякуємо, що обираєте ручну роботу!";
+
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Check_LEVKOVO_${new Date().getTime()}.txt`;
+    document.body.appendChild(link); 
+    link.click(); 
+    document.body.removeChild(link);
 }
 
 function handleFileChange(input) { document.getElementById('file-filename').innerText = input.files.length > 0 ? input.files[0].name : "Файл не вибрано"; }
@@ -1040,20 +1149,22 @@ async function loadSidebarCategories() {
 // ==========================================
 // 7. НОВА ПОШТА (JQUERY)
 // ==========================================
-$(document).ready(function() {
-    $('#npCity').on('input', async function() {
-        let val = $(this).val(); let listContainer = $(this).next('.autocomplete-list');
-        if (val.length < 2) return listContainer.hide();
-        try {
-            const response = await fetch(DATABASE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: "novaPoshta", calledMethod: "getCities", methodProperties: { FindByString: val } }) });
-            const res = await response.json();
-            if(res.data && res.data.length > 0) {
-                let html = ''; res.data.forEach(city => { html += `<div class="list-item" style="padding:10px; cursor:pointer; border-bottom:1px solid #eee;" onclick="selectCity('${city.Description}', '${city.Ref}')">${city.Description}</div>`; });
-                listContainer.html(html).show();
-            } else { listContainer.hide(); }
-        } catch (e) {}
+if (typeof $ !== 'undefined') {
+    $(document).ready(function() {
+        $('#npCity').on('input', async function() {
+            let val = $(this).val(); let listContainer = $(this).next('.autocomplete-list');
+            if (val.length < 2) return listContainer.hide();
+            try {
+                const response = await fetch(DATABASE_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: "novaPoshta", calledMethod: "getCities", methodProperties: { FindByString: val } }) });
+                const res = await response.json();
+                if(res.data && res.data.length > 0) {
+                    let html = ''; res.data.forEach(city => { html += `<div class="list-item" style="padding:10px; cursor:pointer; border-bottom:1px solid #eee;" onclick="selectCity('${city.Description}', '${city.Ref}')">${city.Description}</div>`; });
+                    listContainer.html(html).show();
+                } else { listContainer.hide(); }
+            } catch (e) {}
+        });
     });
-});
+}
 
 function selectCity(name, ref) { $('#npCity').val(name); $('.autocomplete-list').hide(); $('#npWarehouse').prop('disabled', false).val('').focus(); setupWarehouseSearch(ref); }
 
@@ -1224,3 +1335,109 @@ window.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(renderWholesaleBanner, 150);
 });
+// ==========================================
+// СИСТЕМА ПРОМОКОДІВ (LEBIGA ENGINE)
+// ==========================================
+let activePromo = null; // Зберігає застосований промокод
+window.checkoutFinalTotal = 0; // Глобальна фінальна ціна
+
+// 1. АДМІН: Додавання промокоду
+async function adminAddPromo() {
+    const code = document.getElementById('newPromoCode').value.trim().toUpperCase();
+    const discount = parseInt(document.getElementById('newPromoDiscount').value);
+    const hours = parseInt(document.getElementById('newPromoHours').value);
+
+    if (!code || isNaN(discount) || isNaN(hours)) return alert("Заповніть всі поля коректно!");
+    if (discount <= 0 || discount > 99) return alert("Знижка має бути від 1% до 99%");
+
+    const expiresAt = new Date(new Date().getTime() + hours * 60 * 60 * 1000).toISOString();
+
+    try {
+        const { error } = await supabaseClient.from('promocodes').insert([{ code, discount, expires_at: expiresAt }]);
+        if (error) throw error;
+        alert(`Промокод ${code} на -${discount}% створено! Діє ${hours} год.`);
+        document.getElementById('newPromoCode').value = '';
+        document.getElementById('newPromoDiscount').value = '';
+        document.getElementById('newPromoHours').value = '';
+        adminLoadPromos();
+    } catch (e) { alert("Помилка (можливо такий код вже є): " + e.message); }
+}
+
+// 2. АДМІН: Завантаження і видалення
+async function adminLoadPromos() {
+    const container = document.getElementById('promo-list-container');
+    container.style.display = 'block';
+    container.innerHTML = 'Завантаження...';
+    try {
+        const { data, error } = await supabaseClient.from('promocodes').select('*').order('expires_at', { ascending: false });
+        if (error) throw error;
+        if (data.length === 0) return container.innerHTML = 'Промокодів немає.';
+        
+        container.innerHTML = data.map(p => {
+            const isExpired = new Date(p.expires_at) < new Date();
+            const status = isExpired ? '<span style="color:red;">МЕРТВИЙ</span>' : '<span style="color:green;">АКТИВНИЙ</span>';
+            return `<div style="background:#fff; padding:10px; border:1px solid #ddd; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between; align-items:center;">
+                <div><b>${p.code}</b> (-${p.discount}%) | До: ${new Date(p.expires_at).toLocaleString('uk-UA')} | ${status}</div>
+                <button onclick="adminDeletePromo(${p.id})" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Видалити</button>
+            </div>`;
+        }).join('');
+    } catch (e) { container.innerHTML = 'Помилка завантаження.'; }
+}
+
+async function adminDeletePromo(id) {
+    if(!confirm("Точно видалити промокод?")) return;
+    await supabaseClient.from('promocodes').delete().eq('id', id);
+    adminLoadPromos();
+}
+
+// Перевірка адміна при завантаженні (для відображення блоку)
+window.addEventListener('DOMContentLoaded', async () => {
+    setTimeout(async () => {
+        const panel = document.getElementById('admin-promo-controls');
+        if (panel && await isAdminUser()) panel.style.display = 'block';
+    }, 500);
+});
+
+// 3. КЛІЄНТ: Перевірка промокоду
+async function checkPromoCode() {
+    const input = document.getElementById('promoCodeInput');
+    const msg = document.getElementById('promo-status-msg');
+    const code = input.value.trim().toUpperCase();
+
+    if(!code) { 
+        activePromo = null; 
+        input.style.borderColor = '#ccc'; input.style.color = '#111';
+        msg.innerText = '';
+        renderCheckoutSummary(); 
+        return; 
+    }
+
+    input.disabled = true;
+    msg.innerText = 'Перевірка...'; msg.style.color = '#888';
+
+    try {
+        const { data, error } = await supabaseClient.from('promocodes').select('*').eq('code', code).single();
+        if (error || !data) throw new Error("Код не знайдено");
+        
+        if (new Date(data.expires_at) < new Date()) {
+            throw new Error("Час дії промокоду вичерпано!");
+        }
+
+        // УСПІХ
+        activePromo = { code: data.code, discount: data.discount };
+        input.style.borderColor = '#28a745';
+        input.style.color = '#28a745';
+        msg.innerText = `✅ Промокод знайдено! Знижка -${data.discount}%`;
+        msg.style.color = '#28a745';
+        
+    } catch (e) {
+        // ПОМИЛКА
+        activePromo = null;
+        input.style.borderColor = '#ff4d4d';
+        input.style.color = '#ff4d4d';
+        msg.innerText = `❌ ${e.message === "Код не знайдено" ? "Такого коду не існує" : e.message}`;
+        msg.style.color = '#ff4d4d';
+    }
+    input.disabled = false;
+    renderCheckoutSummary(); // Перемальовуємо чек
+}

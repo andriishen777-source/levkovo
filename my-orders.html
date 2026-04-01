@@ -53,7 +53,9 @@
         /* Скролбар для Канбану */
         .kanban-board::-webkit-scrollbar { height: 10px; }
         .kanban-board::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+       
     </style>
+   
 </head>
 <body>
 
@@ -308,7 +310,7 @@ function renderAdminKanban(ordersToRender) {
                         <option value="Виконано" ${order.status === 'Виконано' ? 'selected' : ''}>Виконано</option>
                         <option value="Скасовано" ${order.status === 'Скасовано' ? 'selected' : ''}>Скасовано</option>
                     </select>
-                    
+                    <button onclick="printReceipt(${order.id})" style="background: #111; color: #ffd700; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; margin-right: 10px;">🖨️ ДРУК</button>
                     <button onclick="deleteOrder(${order.id})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 1.1rem;" title="Видалити замовлення">🗑️</button>
                 </div>
             </div>
@@ -425,6 +427,83 @@ window.addEventListener('DOMContentLoaded', () => {
         if (typeof updateCartCount === "function") updateCartCount();
     }, 100);
 });
+// ==========================================
+// ДВИГУН ДРУКУ ТЕРМОЧЕКІВ (HOT SWAP МЕТОД)
+// ==========================================
+function printReceipt(orderId) {
+    const order = globalOrders.find(o => o.id === orderId);
+    if (!order) return alert("Замовлення не знайдено!");
+
+    // 1. Формуємо дату та список товарів
+    const d = new Date(order.created_at);
+    const dateStr = `${("0"+d.getDate()).slice(-2)}.${("0"+(d.getMonth()+1)).slice(-2)}.${d.getFullYear()} ${("0"+d.getHours()).slice(-2)}:${("0"+d.getMinutes()).slice(-2)}`;
+
+    let itemsHtml = '';
+    if (order.items && Array.isArray(order.items)) {
+        order.items.forEach(item => {
+            itemsHtml += `
+                <div style="margin-bottom: 5px;">${item.name}</div>
+                <div style="text-align: right; padding-bottom: 5px; border-bottom: 1px dashed #000; margin-bottom: 5px;">${item.qty} шт x ${item.price} = ${item.qty * item.price} грн</div>
+            `;
+        });
+    }
+
+    let promoHtml = '';
+    if (order.comment && order.comment.includes('Промокод:')) {
+        const promoMatch = order.comment.match(/Промокод:\s*(.*?)\s*\|/);
+        if (promoMatch && promoMatch[1] && promoMatch[1] !== 'немає') {
+            promoHtml = `<div style="text-align: right; font-size: 12px; margin-bottom: 5px;">Знижка: ${promoMatch[1]}</div>`;
+        }
+    }
+
+    // 2. Створюємо HTML-код самого чека (ІЗ ЖОРСТКИМ CSS ДЛЯ PDF)
+    const receiptHTML = `
+        <style>
+            @page {
+                size: 58mm auto; /* Наказ браузеру: обрізати PDF під розмір чека */
+                margin: 0;
+            }
+        </style>
+        <div style="width: 58mm; margin: 0 auto; font-family: 'Courier New', Courier, monospace; font-size: 12px; color: #000;">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <div style="font-size: 20px; font-weight: bold; font-family: sans-serif; letter-spacing: 2px;">LEVKOVO</div>
+                <div>Майстерня шкіри</div>
+                <div>+38 (068) 972-15-98</div>
+                <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+                <div>ТОВАРНИЙ ЧЕК № ${order.id}</div>
+                <div>${dateStr}</div>
+            </div>
+            
+            <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+            
+            ${itemsHtml}
+            ${promoHtml}
+            
+            <div style="font-weight: bold; font-size: 16px; text-align: right; margin-top: 10px;">
+                ДО СПЛАТИ: ${order.total_price} грн
+            </div>
+            
+            <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+            <div style="text-align: center; margin-top: 10px; font-size: 10px; line-height: 1.4;">
+                Дякуємо, що обираєте ручну роботу!<br>
+                Inst: @levkovo__manufacture<br>
+                levkovo.com.ua
+            </div>
+        </div>
+    `;
+    
+    // 3. HOT SWAP (Гаряча заміна)
+    const originalContent = document.body.innerHTML; // Зберігаємо всю твою адмінку в пам'ять
+    document.body.innerHTML = receiptHTML;           // Показуємо тільки чек
+
+    setTimeout(() => {
+        window.print();                              // Викликаємо вікно друку
+        document.body.innerHTML = originalContent;   // Миттєво повертаємо адмінку назад
+        
+        // Оскільки ми замінили HTML, нам треба переприв'язати події до Канбан-дошки
+        setTimeout(() => { location.reload(); }, 100); 
+    }, 100);
+}
 </script>
 </body>
 </html>

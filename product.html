@@ -18,6 +18,7 @@
         .dyn-color-circle { box-sizing: border-box; }
         .dyn-color-circle.active { border: 3px solid #ffd700 !important; transform: scale(1.15) !important; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
+    <script src="analytics.js"></script>
 </head>
 <body>
 
@@ -87,7 +88,13 @@
     <div id="dynamic-options-container" style="background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px;">
         
         <div id="section-colors" style="display: none; margin-bottom: 25px;">
-            <strong style="display:block; margin-bottom: 10px; color: #333;">Оберіть колір шкіри:</strong>
+            <strong style="display: block; margin-bottom: 10px;">
+    Оберіть колір шкіри: <span id="color-display-text" style="color: #8b4513; margin-left: 5px;"></span>
+</strong>
+          <div style="background-color: #fff9e6; border-left: 4px solid #f39c12; padding: 10px 12px; margin-bottom: 15px; border-radius: 0 4px 4px 0; font-size: 0.85rem; color: #666; display: flex; align-items: flex-start; gap: 8px;">
+    <span style="font-size: 1.1rem; line-height: 1;">⚠️</span>
+    <span style="line-height: 1.4;">Колір шкіри може незначно відрізнятися від фото через налаштування вашого екрана та особливості натурального матеріалу.</span>
+</div>
             <div id="render-colors" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
             <input type="hidden" id="selectedColorValue" value="">
         </div>
@@ -183,6 +190,14 @@
                 <div id="checkout-items"></div>
                 <div id="checkout-total" style="font-weight: bold; margin-top: 10px; font-size: 1.2rem; color: #8b4513;"></div>
             </div>
+            <div style="background: #f9f9f9; padding: 12px; border-radius: 8px; border: 1px dashed #ccc; margin-top: 15px; margin-bottom: 15px;">
+    <strong style="display:block; margin-bottom: 5px; font-size: 0.9rem;">Є промокод? (не обов'язково):</strong>
+    <div style="display: flex; gap: 5px;">
+        <input type="text" id="promoCodeInput" class="levkovo-input" placeholder="Введіть код" style="text-transform: uppercase; width: 100%; box-sizing: border-box; transition: 0.3s;">
+        <button type="button" onclick="checkPromoCode()" style="background: #111; color: white; border: none; border-radius: 5px; padding: 0 15px; cursor: pointer; font-weight: bold;">Застосувати</button>
+    </div>
+    <div id="promo-status-msg" style="font-size: 0.8rem; margin-top: 5px; font-weight: bold;"></div>
+</div>
             <button type="submit" class="modal-btn btn-confirm" style="margin-top: 15px;">Підтвердити замовлення</button>
             
         </form>
@@ -293,37 +308,7 @@
 
 <script>
     // ПЕРЕМИКАННЯ ФОТОГРАФІЙ ПРИ ВИБОРІ КОЛЬОРУ
-    function selectDynamicColor(element, colorName) {
-        document.querySelectorAll('.dyn-color-circle').forEach(el => { 
-            el.classList.remove('active');
-            el.style.border = '1px solid #ccc'; 
-            el.style.transform = 'scale(1)'; 
-        });
-        element.classList.add('active');
-        element.style.border = '3px solid #ffd700';
-        element.style.transform = 'scale(1.15)';
-        
-        document.getElementById('selectedColorValue').value = colorName;
-
-        let engColorKey = null;
-        for (const [key, value] of Object.entries(dictColors)) {
-            if (value.name === colorName) {
-                engColorKey = key;
-                break;
-            }
-        }
-        
-        if (engColorKey) {
-            const imgName = engColorKey + '.jpg';
-            const thumbnails = document.getElementById('prod-thumbnails').getElementsByTagName('img');
-            for (let i = 0; i < thumbnails.length; i++) {
-                if (thumbnails[i].src.includes(imgName)) {
-                    document.getElementById('prod-img').src = thumbnails[i].src;
-                    break;
-                }
-            }
-        }
-    }
+   
 </script>
 <div id="reviewsModal" class="modal-overlay" style="display:none; z-index: 100000; background: rgba(0,0,0,0.92); backdrop-filter: blur(5px); align-items: center; justify-content: center;">
     
