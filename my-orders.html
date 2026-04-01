@@ -219,18 +219,25 @@ function renderClientList(orders) {
         const style = STATUS_COLORS[order.status] || STATUS_COLORS['В обробці'];
         const itemsList = order.items ? order.items.map(i => `• ${i.name} (x${i.qty})`).join('<br>') : 'Товари не вказані';
 
-        html += `
+       html += `
             <div class="client-order-card" style="border-left-color: ${style.border};">
-                <div class="client-meta">
-                    <strong style="color: #111; font-size: 1.1rem;">№ ${order.id || '...'}</strong><br>
-                    <span style="display:inline-block; margin-top:5px;">📅 ${dateStr}</span><br>
-                    <span class="status-badge" style="display:inline-block; margin-top:10px; background: ${style.bg}; color: ${style.color};">${order.status}</span>
+                <div style="display: flex; flex-wrap: wrap; width: 100%; justify-content: space-between; align-items: flex-start;">
+                    <div class="client-meta">
+                        <strong style="color: #111; font-size: 1.1rem;">№ ${order.id || '...'}</strong><br>
+                        <span style="display:inline-block; margin-top:5px;">📅 ${dateStr}</span><br>
+                        <span class="status-badge" style="display:inline-block; margin-top:10px; background: ${style.bg}; color: ${style.color};">${order.status}</span>
+                    </div>
+                    <div class="client-items">
+                        ${itemsList}
+                    </div>
+                    <div class="client-price">
+                        ${order.total_price} грн
+                    </div>
                 </div>
-                <div class="client-items">
-                    ${itemsList}
-                </div>
-                <div class="client-price">
-                    ${order.total_price} грн
+                
+                <div style="width: 100%; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee; font-size: 0.85rem; color: #555;">
+                    <div style="margin-bottom: 5px;">📍 <b>Доставка:</b> ${order.address || 'Не вказано'}</div>
+                    ${order.comment ? `<div>💬 <b>Деталі:</b> ${order.comment}</div>` : ''}
                 </div>
             </div>
         `;
@@ -245,8 +252,8 @@ const KANBAN_COLUMNS = [
     { id: 'В обробці', title: '🔴 Нові', match: 'В обробці' },
     { id: 'Підтверджено', title: '🟡 В роботі', match: 'Підтверджено' },
     { id: 'Відправлено', title: '🔵 Відправлено', match: 'Відправлено' },
-    { id: 'Виконано', title: '🟢 Виконано', match: 'Виконано' }
-    // Скасовані сюди не виводимо, щоб не смітити дошку. Вони залишаться в базі.
+    { id: 'Виконано', title: '🟢 Виконано', match: 'Виконано' },
+    { id: 'Скасовано', title: '⚪ Скасовано', match: 'Скасовано' }
 ];
 
 function renderAdminKanban(ordersToRender) {
@@ -276,7 +283,7 @@ function renderAdminKanban(ordersToRender) {
             html += `
             <div class="kanban-card" style="border-left-color: ${style.border};">
                 <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
-                    <strong style="color: #111; font-size: 1.05rem;">${order.client_name || 'Невідомий'}</strong>
+                   <strong style="color: #111; font-size: 1.05rem;">№${order.id} | ${order.client_name || 'Невідомий'}</strong>
                     <span style="font-size:0.75rem; color:#888;">${dateStr}</span>
                 </div>
                 
