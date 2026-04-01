@@ -415,7 +415,8 @@ async function loadProducts(categoryId) {
             // ТУТ ТЕЖ ДОДАНО ЛАПКИ '${product.id}'
             card.innerHTML = `
                 <img src="${product.main_image}" alt="${product.title}" onclick="goToProduct('${product.id}')" style="cursor:pointer; width:100%; border-radius:8px; object-fit:cover; aspect-ratio:4/3; transition:0.3s;">
-                <h3 onclick="goToProduct('${product.id}')" style="cursor:pointer; font-size:1.1rem; margin:10px 0;">${product.title}</h3>
+               <h3 onclick="goToProduct('${product.id}')" style="cursor:pointer; font-size:1.1rem; margin:10px 0 5px 0;">${product.title}</h3>
+<p style="font-size: 0.85rem; color: #666; margin: 0 0 10px 0; line-height: 1.3;">${product.description || ''}</p>
                 ${priceHtml}
                 ${adminControls}
             `;
@@ -625,20 +626,14 @@ async function addDynamicProductToCart() {
     
     if (fileInput && fileInput.files[0]) {
         const file = fileInput.files[0];
-        if (file.size > 2000000) { alert("Файл занадто великий для кошика. Візьмемо його при оформленні!"); } 
-        else {
-            hasFile = true;
-           const fileData = await new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.readAsDataURL(file);
-            });
-            try {
-                localStorage.setItem('pendingFileBase64', fileData);
-            } catch (e) {
-                alert("Пам'ять браузера переповнена! Ми не змогли прикріпити фото, але ви можете додати товар без нього і відправити фото нам у Telegram.");
-                hasFile = false; 
-            }
+        hasFile = true;
+        try {
+            // Стискаємо фото перед збереженням
+            const compressedBase64 = await compressImage(file);
+            localStorage.setItem('pendingFileBase64', compressedBase64);
+        } catch (e) {
+            alert("Помилка обробки фото. Можливо, файл пошкоджено.");
+            hasFile = false; 
         }
     }
 
@@ -766,7 +761,18 @@ async function autoRegisterGuest(name, phone) {
 
 async function generateReceipt(event) {
     event.preventDefault();
-
+// Блокування від подвійних кліків
+    if (window.isOrderSubmitting) return; 
+    window.isOrderSubmitting = true;
+    
+    // Візуальна зміна кнопки (щоб клієнт бачив, що процес пішов)
+    const btn = event.target.tagName === 'BUTTON' ? event.target : event.target.querySelector('button');
+    let originalBtnText = "Підтвердити";
+    if (btn) {
+        originalBtnText = btn.innerText;
+        btn.innerText = "⏳ Обробка...";
+        btn.style.opacity = "0.7";
+    }
     const itemsForDB = cart.filter(i => i.selected);
     if (itemsForDB.length === 0) {
         alert("КРИТИЧНА ПОМИЛКА: Кошик порожній або товари не вибрані!");
@@ -852,9 +858,16 @@ async function generateReceipt(event) {
         saveCart(); 
         closeCheckout();
         renderReceiptOverlay(`${totalSum} грн`, finalItems.map(i => `• ${i.name} x${i.qty}`).join('<br>'));
-    } catch (e) { 
+   } catch (e) { 
         alert("Сталася помилка при відправці замовлення. Спробуйте ще раз."); 
         console.error("Checkout Error:", e);
+    } finally {
+        // Знімаємо блокування в будь-якому випадку (успіх або помилка)
+        window.isOrderSubmitting = false;
+        if (btn) {
+            btn.innerText = originalBtnText;
+            btn.style.opacity = "1";
+        }
     }
 }
 
@@ -1143,6 +1156,30 @@ function openLegalModal(modalId) {
     } else {
         alert("КРИТИЧНА ПОМИЛКА: Вікно '" + modalId + "' не знайдено у цьому файлі HTML. Встав його код!");
     }
+}
+// ==========================================
+// ЖОРСТКЕ СТИСНЕННЯ ЗОБРАЖЕНЬ (Захист від перевантаження)
+// ==========================================
+function compressImage(file, maxWidth = 800) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let ratio = maxWidth / img.width;
+                if(ratio > 1) ratio = 1; 
+                canvas.width = img.width * ratio;
+                canvas.height = img.height * ratio;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const base64 = canvas.toDataURL('image/jpeg', 0.7); 
+                resolve(base64);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
 }
 // ==========================================
 // 9. ЄДИНИЙ МАЙСТЕР-ЗАПУСК УСІХ СИСТЕМ
