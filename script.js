@@ -529,8 +529,8 @@ async function saveNewProduct() {
 // ==========================================
 const dictColors = {
     'cognac': { hex: '#8b4513', name: 'Коньяк' }, 'black': { hex: '#222222', name: 'Чорний' },
-    'red': { hex: '#8b0000', name: 'Червоний' }, 'green': { hex: '#006400', name: 'Зелений' },
-    'chocolate': { hex: '#3b2818', name: 'Шоколад' }, 'yellow': { hex: '#e5b73b', name: 'Жовтий' },
+    'red': { hex: '#8b0000', name: 'Червоний' }, 'green': { hex: '#234923', name: 'Зелений' },
+    'chocolate': { hex: '#3b2818', name: 'Шоколад' }, 'yellow': { hex: '#d8b659', name: 'Жовтий' },
     'lightblue': { hex: '#5b92e5', name: 'Голубий' }, 'cappuccino': { hex: '#9c7e65', name: 'Капучино' },
     'caramel': { hex: '#c07c40', name: 'Карамель' }, 'olive': { hex: '#4b5320', name: 'Олива' },
     'navy': { hex: '#1c2e4a', name: 'Темно-синій' }, 'burgundy': { hex: '#4a0e17', name: 'Бордовий' }
