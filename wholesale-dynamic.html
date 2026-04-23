@@ -2,6 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оптове замовлення | LEVKOVO</title>
     <link rel="icon" type="image/png" href="favicon.jpg">
@@ -15,7 +16,7 @@
         
         .ws-card { background: #fff; border: 2px solid transparent; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; position: relative; transition: 0.2s; display: flex; flex-direction: column; }
         .ws-card.active { border-color: #ffd700; transform: translateY(-5px); box-shadow: 0 8px 15px rgba(255, 215, 0, 0.2); }
-        .ws-card img { width: 100%; height: 180px; object-fit: cover; }
+        .ws-card img { width: 100%; height: 180px; object-fit: contain; }
         .ws-card-title { padding: 15px 15px 5px 15px; text-align: center; font-weight: bold; margin: 0; }
         
         .btn-group-small { display: flex; gap: 5px; padding: 0 15px 15px 15px; justify-content: center; }
@@ -48,6 +49,7 @@
         .gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; font-size: 24px; padding: 10px; cursor: pointer; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
     </style>
     <script src="analytics.js"></script>
+    
 </head>
 <body>
 
@@ -206,7 +208,7 @@
         <label style="font-size: 0.8rem; color: #666;">Короткий опис:</label>
         <input type="text" id="setDesc" class="custom-input" placeholder="Популярні марки...">
         <label style="font-size: 0.8rem; color: #666;">Що всередині (Марки через кому):</label>
-        <textarea id="setBrands" class="custom-input" rows="3" placeholder="Toyota (5шт), Honda (3шт), BMW"></textarea>
+        <textarea id="setBrands" class="custom-input" rows="3" placeholder="тойота (5шт), хонда (3шт), беха"></textarea>
         <div class="btn-group">
             <button class="btn-save" onclick="saveSet()">ЗБЕРЕГТИ</button>
             <button class="btn-delete" id="btnDeleteSet" onclick="deleteSet()">ВИДАЛИТИ</button>
@@ -364,6 +366,7 @@
             <label style="font-size: 0.8rem; color: #666; font-weight: bold; margin-bottom: 5px; display: block;">Пароль</label>
             <input type="password" id="loginPassword" name="password" autocomplete="current-password" placeholder="Ваш пароль" required style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; background: #fafafa;">
             <button type="submit" style="width: 100%; padding: 14px; background: #111; color: #ffd700; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; text-transform: uppercase;">Увійти</button>
+             <h6 color="ffff">Після натискання на кнопку зачекайте кілька секунд</h6>
             <div style="text-align: center; margin-top: 15px;">
                 <span onclick="showAuthChoice()" style="font-size: 0.85rem; color: #888; cursor: pointer; text-decoration: underline;">← Повернутися</span>
             </div>
@@ -385,11 +388,11 @@
     let currentGalleryIndex = 0;
 
     const wsColorImages = {
-        'Коньяк': 'cognac.jpg', 'Чорний': 'black.jpg', 'Червоний': 'red.jpg',
-        'Зелений': 'green.jpg', 'Шоколад': 'chocolate.jpg', 'Жовтий': 'yellow.jpg',
-        'Капучино': 'cappuccino.jpg', 'Карамель': 'caramel.jpg',
-        'Бордовий': 'burgundy.jpg', 'Темно-синій': 'navy.jpg', 
-        'Олива': 'olive.jpg', 'Голубий': 'lightblue.jpg'
+        'Коньяк': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/cognac.jpg', 'Чорний': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/IMG_6215.jpg', 'Червоний': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/red.jpg',
+        'Зелений': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/IMG_6213.jpg', 'Шоколад': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/IMG_6212.jpg', 'Жовтий': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/yellow.jpg',
+        'Капучино': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/cappuccino.jpg', 'Карамель': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/caramel.jpg',
+        'Бордовий': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/IMG_6210 1.jpg', 'Темно-синій': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/IMG_6211.jpg', 
+        'Олива': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/IMG_6209%201.jpg', 'Голубий': 'https://gbcjezzvioayompuqojx.supabase.co/storage/v1/object/public/product-images/color%20crazy%20horze/IMG_6214.jpg'
     };
 
     window.addEventListener('DOMContentLoaded', async () => {
